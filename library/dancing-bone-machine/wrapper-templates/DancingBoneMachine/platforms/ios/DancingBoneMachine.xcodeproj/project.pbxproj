@@ -27,7 +27,6 @@
 		302D95F114D2391D003F00A1 /* MainViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 302D95EF14D2391D003F00A1 /* MainViewController.m */; };
 		302D95F214D2391D003F00A1 /* MainViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 302D95F014D2391D003F00A1 /* MainViewController.xib */; };
 		305D5FD1115AB8F900A74A75 /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 305D5FD0115AB8F900A74A75 /* MobileCoreServices.framework */; };
-		3081CC6717C195DA005C4F02 /* libpd-ios.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3081CC6217C19580005C4F02 /* libpd-ios.a */; };
 		3088BBBD154F3926009F9C59 /* Default-Landscape@2x~ipad.png in Resources */ = {isa = PBXBuildFile; fileRef = 3088BBB7154F3926009F9C59 /* Default-Landscape@2x~ipad.png */; };
 		3088BBBE154F3926009F9C59 /* Default-Landscape~ipad.png in Resources */ = {isa = PBXBuildFile; fileRef = 3088BBB8154F3926009F9C59 /* Default-Landscape~ipad.png */; };
 		3088BBBF154F3926009F9C59 /* Default-Portrait@2x~ipad.png in Resources */ = {isa = PBXBuildFile; fileRef = 3088BBB9154F3926009F9C59 /* Default-Portrait@2x~ipad.png */; };
@@ -39,6 +38,7 @@
 		308D05391370CCF300D202BF /* icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 308D05301370CCF300D202BF /* icon@2x.png */; };
 		30A0434814DC770100060A13 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 30A0434314DC770100060A13 /* Localizable.strings */; };
 		30A0434914DC770100060A13 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 30A0434614DC770100060A13 /* Localizable.strings */; };
+		30B88E9917C19AC300EE0BB8 /* libpd-ios.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3081CC6217C19580005C4F02 /* libpd-ios.a */; };
 		30D3495F17BF287600D2AF00 /* PureData.m in Sources */ = {isa = PBXBuildFile; fileRef = 30D3495E17BF287600D2AF00 /* PureData.m */; };
 		30E5649213A7FCAF007403D8 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 30E5649113A7FCAF007403D8 /* CoreMedia.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		30FC414916E50CA1004E6F35 /* icon-72@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 30FC414816E50CA1004E6F35 /* icon-72@2x.png */; };
@@ -79,7 +79,7 @@
 			remoteGlobalIDString = 119013AB1486450C00086F19;
 			remoteInfo = "libpd-osx";
 		};
-		3081CC6517C195CF005C4F02 /* PBXContainerItemProxy */ = {
+		30B88E9717C19ABB00EE0BB8 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 30ED2C5717C194DC00B84562 /* libpd.xcodeproj */;
 			proxyType = 1;
@@ -148,7 +148,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3081CC6717C195DA005C4F02 /* libpd-ios.a in Frameworks */,
+				30B88E9917C19AC300EE0BB8 /* libpd-ios.a in Frameworks */,
 				301BF5B9109A6A2B0062928A /* AudioToolbox.framework in Frameworks */,
 				301BF5BB109A6A2B0062928A /* AVFoundation.framework in Frameworks */,
 				301BF5BF109A6A2B0062928A /* CoreLocation.framework in Frameworks */,
@@ -366,7 +366,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				3081CC6617C195CF005C4F02 /* PBXTargetDependency */,
+				30B88E9817C19ABB00EE0BB8 /* PBXTargetDependency */,
 				301BF551109A68C00062928A /* PBXTargetDependency */,
 			);
 			name = DancingBoneMachine;
@@ -532,10 +532,10 @@
 			name = CordovaLib;
 			targetProxy = 301BF550109A68C00062928A /* PBXContainerItemProxy */;
 		};
-		3081CC6617C195CF005C4F02 /* PBXTargetDependency */ = {
+		30B88E9817C19ABB00EE0BB8 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = "libpd-ios";
-			targetProxy = 3081CC6517C195CF005C4F02 /* PBXContainerItemProxy */;
+			targetProxy = 30B88E9717C19ABB00EE0BB8 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 

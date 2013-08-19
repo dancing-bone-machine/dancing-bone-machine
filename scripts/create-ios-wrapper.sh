@@ -26,9 +26,22 @@ if [ -d "app/wrappers/ios" ]; then
 fi
 
 echo -e "\n..."
+
 rm -rf app/wrappers/ios
 cp -f -R library/dancing-bone-machine/wrapper-templates/DancingBoneMachine/platforms/ios app/wrappers/ios
+
 cd app/wrappers/ios
+
 rm libpd
 ln -s ../../../library/vendors/pd-for-ios/libpd 
+
+rm pd
+ln -s ../../pd 
+
+rm pd-abstractions
+ln -s ../../../library/dancing-bone-machine/pd/externals/bin pd-abstractions 
+
+rm www
+ln -s ../../html www
+
 echo -e "Done."
