@@ -1,0 +1,14 @@
+#N canvas 109 149 386 172 10;
+#X obj 105 131 outlet;
+#X obj 151 131 outlet;
+#X obj 22 82 unpack f f;
+#X text 18 10 Receives a MIDI sys ex event either from an actual MIDI
+port or from the [dbm-connect] object.;
+#X obj 22 56 receive dbm-sysexin;
+#X obj 165 56 sysexin;
+#X obj 230 101 dbm-license;
+#X connect 2 0 0 0;
+#X connect 2 1 1 0;
+#X connect 4 0 2 0;
+#X connect 5 0 0 0;
+#X connect 5 1 1 0;

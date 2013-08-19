@@ -1,0 +1,20 @@
+#N canvas 190 118 858 298 10;
+#X obj 174 -3 receive \$1;
+#X obj 151 166 outlet;
+#X obj 112 57 symbol \$1;
+#X obj 150 110 list;
+#X obj 174 27 t b b a;
+#X obj 151 142 list;
+#X text 281 -3 Create like [dbm-bind-receive foo] and it will output
+something like "list send dbm-send foo value" Where value is something
+that was sent to foo ( [send foo] ).;
+#X msg 25 57 send dbm-send;
+#X obj 284 137 dbm-license;
+#X connect 0 0 4 0;
+#X connect 2 0 3 1;
+#X connect 3 0 5 0;
+#X connect 4 0 7 0;
+#X connect 4 1 2 0;
+#X connect 4 2 5 1;
+#X connect 5 0 1 0;
+#X connect 7 0 3 0;

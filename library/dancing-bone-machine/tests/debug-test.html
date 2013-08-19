@@ -1,0 +1,167 @@
+<!DOCTYPE HTML>
+
+<!--    
+    Copyright (c) 2013 Rafael Vega González <rvega@elsoftwarehamuerto.org>
+
+    This file is part of Dancing Bone Machine.
+
+    Dancing Bone Machine is free software; you can redistribute it and/or modify it under
+    the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
+
+    Dancing Bone Machine is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+
+
+<html>
+   <head>
+      <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+      <title>Index</title>
+      <script src="../html/dancing-bone-machine.js" type="text/javascript" charset="utf-8"></script>
+      <script type="text/javascript" charset="utf-8">
+         function main(){
+            alert("The testing procedure requires a human's help. First, open debug-test.pd and then click ok.");
+            PD.configurePlayback(44100, 2, false, false);
+            PD.openFile('pd/patches', 'synth.pd', function(){
+               test();
+            },
+            function(){
+               alert("Connection with pd was not established. Did you open the patch?");
+            });
+         }
+         
+         function test(){
+            functionExists(PD.initialize);
+            functionExists(PD.clearSearchPath);
+            functionExists(PD.addToSearchPath);
+            functionExists(PD.closeFile);
+
+            PD.sendBang('test-receiver');
+            manualAssert("Click OK if there is a message in pd console that reads test-receiver: bang.", "PD.sendBang() failed!");
+
+            PD.sendFloat(0.22, 'test-receiver');
+            manualAssert("Click OK if there is a message in pd console that reads test-receiver: 0.22", "PD.sendFloat() failed!");
+
+            PD.sendSymbol('cat', 'test-receiver');
+            manualAssert("Click OK if there is a message in pd console that reads test-receiver: symbol cat", "PD.sendSymbol() failed!");
+
+            PD.sendList(['one', 'two', 3, 4.0], 'test-receiver');
+            manualAssert("Click OK if there is a message in pd console that reads test-receiver: list one two 3 4.0", "PD.sendList() failed!");
+
+            PD.bind('test-bind', function(message){
+               console.log("test-bind: " + message);
+            });
+            PD.bind('test-bind-2', function(message){
+               console.log("test-bind-2: " + message);
+            });
+            alert("Go send some messages to test-bind and test-bind-2 in pd and verify that they arrive in the console (they'll be visible after you click OK.");
+            setTimeout(test2, 5000);
+         }
+         
+         function test2(){
+            PD.unbind('test-bind-2');
+            alert("Now, messages for test-bind-2 should not arrive");
+            setTimeout(test3, 5000);
+         }
+
+         function test3(){
+            PD.unbindAll();
+            alert("Now, no messages should arrive at all");
+            setTimeout(test4, 5000);
+         }
+
+         function test4(){
+            PD.readArray('array1', 128, 64, function(data){
+               console.log(data);
+            });
+            setTimeout(test5, 200);
+         }
+         
+         function test5(){
+            manualAssert("Click OK if a bunch of numbers were printed to the console (contents of the array1 graph.", "PD.readArray() failed!");
+
+            PD.sendNoteOn(3, 2, 1);
+            PD.sendControlChange(6, 5, 4);
+            PD.sendProgramChange(8, 7);
+            PD.sendPitchBend(10, 9);
+            PD.sendAfterTouch(12, 11);
+            PD.sendPolyAfterTouch(15, 14, 13);
+            PD.sendMidiByte(17, 16);
+            PD.sendSysEx(19, 18);
+            PD.sendSysRealTime(21, 20);
+
+            manualAssert("Look for midi messages in the PD console, numbers should be loged up to 21 with 9 receive names.", "PD.sendXXX() failed!");
+
+            PD.bindMidiNoteOn(function(msg){
+               console.log('Note On ' + msg);
+            });
+
+            PD.bindMidiControlChange(function(msg){
+               console.log('Control Change ' + msg);
+            });
+
+            PD.bindMidiProgramChange(function(msg){
+               console.log('Program Change ' + msg);
+            });
+
+            PD.bindMidiPitchBend(function(msg){
+               console.log('Pitch Bend ' + msg);
+            });
+
+            PD.bindMidiAfterTouch(function(msg){
+               console.log('After Touch ' + msg);
+            });
+
+            PD.bindMidiPolyAfterTouch(function(msg){
+               console.log('Poly After Touch ' + msg);
+            });
+
+            PD.bindMidiByte(function(msg){
+               console.log('Midi Byte ' + msg);
+            });
+
+            alert("Go bang on SEND MIDI and look at the received messages in the console here.  (they'll be visible after you click OK.");
+            setTimeout(test6, 5000);
+         }
+
+         function test6(){
+            manualAssert("Click OK if a bunch of MIDI messages were printed to the console. You should see numbers up to 17 and 7 message types.", "PD.bindXXX() failed!");
+
+            PD.setActive(true);
+            manualAssert("Click OK if DSP was turned ON in puredata.", "PD.setActive(true) failed!");
+
+            PD.setActive(false);
+            manualAssert("Click OK if DSP was turned OFF in puredata.", "PD.setActive(false) failed!");
+
+            alert('Done!');
+         }
+
+         function functionExists(fn){
+            if(typeof fn != 'function'){
+               var msg = "The function " + fn + " should exist.";
+               console.error(msg);
+               alert(msg);
+               undefinedObj.undefinedMethod(); // A runtime error so the script stops
+            }
+         }
+
+         function manualAssert(assertion, errorMsg){
+            if(!confirm(assertion)){
+               console.error(errorMsg);
+               alert(errorMsg);
+               undefinedObj.undefinedMethod(); // A runtime error so the script stops
+            }
+         }
+      </script>
+   </head>
+   <body>
+      <p>Look at the console.</p>
+   </body>
+</html>

@@ -1,0 +1,10 @@
+#N canvas 296 173 215 188 10;
+#X obj -913 -152 osc~ 440;
+#X obj -913 -85 *~ 0;
+#X obj -880 -120 receive volume;
+#X obj -913 -38 dac~;
+#X obj -914 -190 dbm-connect;
+#X connect 0 0 1 0;
+#X connect 1 0 3 0;
+#X connect 1 0 3 1;
+#X connect 2 0 1 1;

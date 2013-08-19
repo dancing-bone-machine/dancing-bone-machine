@@ -1,0 +1,48 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+   <meta charset="utf-8" />
+   <meta name="format-detection" content="telephone=no" />
+   <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
+
+   <title>Dancing Bone Machine</title>
+
+   <link rel="stylesheet" href="styles/style.css" type="text/css" media="all" />
+
+   <script src="scripts/dancing-bone-machine/dancing-bone-machine.js" type="text/javascript" charset="utf-8"></script>
+</head>
+<body>
+
+   <button id="btn" type="button">Click Me!</button>
+
+   <script type="text/javascript" charset="utf-8">
+      var sound_on = false;
+
+      function button(e){
+         // When the button is clicked, send a message to PD.
+         if(sound_on){
+            PD.sendFloat(0, 'volume');
+            sound_on = false;
+         }
+         else{
+            PD.sendFloat(1, 'volume');
+            sound_on = true;
+         }
+      }
+
+      function main(){
+         // Init PureData engine and load synth.pd patch.
+         PD.configurePlayback(44100, 2, false, false, function(){
+            PD.openFile('pd/patches', 'patch.pd', function(){
+               PD.setActive(true);
+               PD.sendFloat(0, 'volume');
+            });
+         });
+
+         var btn = document.getElementById('btn');
+         btn.onmouseup = button;
+         btn.ontouchend = button;
+      };
+   </script>
+</body>
+</html>

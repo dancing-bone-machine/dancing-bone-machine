@@ -1,0 +1,5 @@
+tty /dev/null
+# First time it runs, our external is not loaded so breakpoints will not work.
+run ./websocket_server-help.pd
+break websocket_server_setup
+run ./websocket_server-help.pd

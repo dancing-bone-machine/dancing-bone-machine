@@ -1,0 +1,39 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+  <title>Index</title>
+</head>
+<body>
+  <script type="text/javascript" charset="utf-8">
+    window.onload = function(){
+      window.WebSocket = window.WebSocket || window.MozWebSocket;
+
+      var websocket = new WebSocket('ws://127.0.0.1:9000', 'pd-websocket'); 
+
+      websocket.onopen = function () {
+        console.log('OPEN');
+      };
+
+      websocket.onerror = function () {
+        console.log('ERROR');
+      };
+
+      websocket.onmessage = function (message) {
+        console.log(message.data);
+      };
+
+      setInterval(function(){
+        try{
+          websocket.send('foo 2.0');
+          websocket.send('bar done');
+          websocket.send('baz 0.00');
+        }
+        catch(err){
+          console.log(err);
+        }
+      },2000);
+    }
+  </script>
+</body>
+</html>

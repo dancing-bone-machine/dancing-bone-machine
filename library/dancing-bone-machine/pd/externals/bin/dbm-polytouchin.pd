@@ -1,0 +1,17 @@
+#N canvas 167 374 386 172 10;
+#X obj 105 131 outlet;
+#X obj 151 131 outlet;
+#X obj 197 131 outlet;
+#X obj 22 82 unpack f f f;
+#X text 18 10 Receives a MIDI poly touch in event either from an actual
+MIDI port or from the [dbm-connect] object.;
+#X obj 22 56 receive dbm-polytouchin;
+#X obj 201 57 polytouchin;
+#X obj 256 109 dbm-license;
+#X connect 3 0 2 0;
+#X connect 3 1 0 0;
+#X connect 3 2 1 0;
+#X connect 5 0 3 0;
+#X connect 6 0 0 0;
+#X connect 6 1 1 0;
+#X connect 6 2 2 0;

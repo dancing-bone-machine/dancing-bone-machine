@@ -1,0 +1,17 @@
+#N canvas 167 119 386 172 10;
+#X obj 105 131 outlet;
+#X obj 151 131 outlet;
+#X obj 197 131 outlet;
+#X obj 22 82 unpack f f f;
+#X text 18 10 Receives a MIDI control in event either from an actual
+MIDI port or from the [dbm-connect] object.;
+#X obj 201 57 ctlin;
+#X obj 22 56 receive dbm-ctlin;
+#X obj 304 157 dbm-license;
+#X connect 3 0 2 0;
+#X connect 3 1 0 0;
+#X connect 3 2 1 0;
+#X connect 5 0 0 0;
+#X connect 5 1 1 0;
+#X connect 5 2 2 0;
+#X connect 6 0 3 0;

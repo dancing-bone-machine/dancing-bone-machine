@@ -1,0 +1,14 @@
+#N canvas 129 257 386 172 10;
+#X obj 105 131 outlet;
+#X obj 151 131 outlet;
+#X obj 22 82 unpack f f;
+#X obj 22 56 receive dbm-pgmin;
+#X text 19 10 Receives a MIDI pgm event either from an actual MIDI
+port or from the [dbm-connect] object.;
+#X obj 165 56 pgmin;
+#X obj 222 100 dbm-license;
+#X connect 2 0 0 0;
+#X connect 2 1 1 0;
+#X connect 3 0 2 0;
+#X connect 5 0 0 0;
+#X connect 5 1 1 0;

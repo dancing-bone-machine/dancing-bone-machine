@@ -1,0 +1,16 @@
+#N canvas 6 424 382 239 10;
+#X obj 100 57 inlet;
+#X obj 152 57 inlet;
+#X text 17 10 Sends a MIDI message to an actual MIDI port and to the
+[websockets_server] object.;
+#X obj 100 97 pack f f;
+#X obj 199 98 bendout;
+#X msg 100 132 send dbm-bendout \$1 \$2;
+#X obj 100 168 s DBM_TO_WEBSOCKET;
+#X obj 301 198 dbm-license;
+#X connect 0 0 3 0;
+#X connect 0 0 4 0;
+#X connect 1 0 3 1;
+#X connect 1 0 4 1;
+#X connect 3 0 5 0;
+#X connect 5 0 6 0;
