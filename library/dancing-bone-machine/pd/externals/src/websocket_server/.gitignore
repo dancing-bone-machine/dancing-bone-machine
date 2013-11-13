@@ -2,6 +2,8 @@
 *.o
 libwebsockets/build
 
+
+stringencoders/.deps
 stringencoders/.libs
 stringencoders/*.lo
 stringencoders/*.h
