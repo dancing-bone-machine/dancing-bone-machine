@@ -30,18 +30,8 @@ echo -e "\n..."
 rm -rf app
 cp -f -R dbm/templates/app app
 
-cd app
-
-# rm libpd
-# ln -s ../../../library/vendors/pd-for-ios/libpd 
-# 
-# rm pd
-# ln -s ../../pd 
-# 
-# rm pd-abstractions
-# ln -s ../../../library/dancing-bone-machine/pd/externals/bin pd-abstractions 
-# 
-# rm www
-# ln -s ../../html www
+cd app/html/scripts
+rm dancing-bone-machine
+ln -s ../../../dbm/library/dancing-bone-machine/html dancing-bone-machine
 
 echo -e "Done."
