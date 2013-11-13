@@ -28,7 +28,7 @@ fi
 echo -e "\n..."
 
 rm -rf app
-cp -f -R dbm/library/dancing-bone-machine/templates/app app
+cp -f -R dbm/templates/app app
 
 cd app
 

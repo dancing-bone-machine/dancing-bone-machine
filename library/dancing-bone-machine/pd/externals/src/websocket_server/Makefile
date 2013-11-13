@@ -115,7 +115,7 @@ ifeq ($(UNAME),Darwin)
       # else
       #   FAT_FLAGS = -arch ppc -arch i386 -arch x86_64 -mmacosx-version-min=10.4
       # endif
-	 FAT_FLAGS = -arch x86_64 
+	 FAT_FLAGS = -arch x86_64 -arch i386
     # endif
     ALL_CFLAGS += $(FAT_FLAGS) -fPIC -I/sw/include
     # if the 'pd' binary exists, check the linking against it to aid with stripping
@@ -265,11 +265,11 @@ debug: all
 	gdb -tui -x debugger_config /usr/bin/pd
 
 stringencoders/.libs/libmodpbase64.a:
-	cd stringencoders && export CFLAGS='-fPIC -O3 -Wall' && ./configure && make
+	cd stringencoders && export CFLAGS='-fPIC -O3 -Wall -arch i386 -arch x86_64' && ./bootstrap.sh && ./configure && make
 
 libwebsockets/build/lib/libwebsockets.a:
 	mkdir -p libwebsockets/build
-	cd libwebsockets/build && cmake -DWITH_SSL=0 ../ && make
+	cd libwebsockets/build && cmake -DCMAKE_C_FLAGS='-arch i386 -arch x86_64' -DWITH_SSL=0 ../ && make
 
 %.o: %.c
 	$(CC) $(ALL_CFLAGS) -o "$*.o" -c "$*.c"
@@ -289,9 +289,9 @@ $(SHARED_LIB): $(SHARED_SOURCE:.c=.o)
 
 # install: libdir_install
 install: all
-	cp -f websocket_server-meta.pd ../../bin
+	# cp -f websocket_server-meta.pd ../../bin
 	cp -f websocket_server-help.pd ../../bin
-	cp -f websocket_server.pd_linux ../../bin
+	cp -f websocket_server.$(EXTENSION) ../../bin
 
 # The meta and help files are explicitly installed to make sure they are
 # actually there.  Those files are not optional, then need to be there.
