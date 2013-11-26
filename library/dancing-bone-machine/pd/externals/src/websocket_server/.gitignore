@@ -1,7 +1,9 @@
+*.pd_darwin
 *.pd_linux
 *.o
 libwebsockets/build
 
+stringencoders/.deps
 stringencoders/.libs
 stringencoders/*.lo
 stringencoders/*.h
