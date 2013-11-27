@@ -294,6 +294,7 @@ define(function() {
                if(n!=0){
                   _readArrayData = _readArrayData.slice(offset, offset+n);
                }
+               _readArrayData = _readArrayData.map(Number);
                cbk(_readArrayData);
             }
          }

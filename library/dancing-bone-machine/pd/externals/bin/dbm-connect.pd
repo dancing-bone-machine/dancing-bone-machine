@@ -1,4 +1,4 @@
-#N canvas 496 60 452 331 10;
+#N canvas 426 143 464 324 10;
 #X msg 247 125 connect;
 #X obj 247 89 loadbang;
 #X obj 247 193 list split 1;
@@ -214,7 +214,7 @@ name-of-signal";
 #X connect 47 0 23 0;
 #X restore 123 264 pd bind;
 #X obj 127 123 list trim;
-#N canvas 745 294 450 300 array 0;
+#N canvas 117 628 450 300 array 0;
 #X obj 31 72 list;
 #X obj 52 50 r \$0-msg;
 #N canvas 124 89 334 141 read-array 0;

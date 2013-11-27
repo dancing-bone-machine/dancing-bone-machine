@@ -25,7 +25,7 @@
 #include "s_stuff.h"
 
 #define MAX_MESSAGE_SIZE 1000000
-#define CHUNK_SIZE 8192
+#define CHUNK_SIZE 512
 
 /**
  * Datasructure to hold the instance variables for each websocket_server
@@ -60,7 +60,7 @@ static void* websocket_server_tick(void* param){
    while(1){
       pthread_testcancel();
       libwebsocket_service(x->context, 0);
-      usleep(100);
+      usleep(500);
    }
    return NULL;
 }
@@ -118,14 +118,16 @@ static int websocket_server_callback_pd(struct libwebsocket_context * this, stru
          }
            
          if(x->need_to_send_array){
+            post("websockets_server: sending array %s", x->array_name);
             // Arrays can be quite big, split into multiple messages
             // First message will look like "dbm-read-array array-name start 0.1 0.2 ..." 
             // Subsequent messages will look like "dbm-read-array array-name 0.1 0.2 ..." 
             // Last message will look like "dbm-read-array array-name 0.1 0.2 ... end" 
             t_word *array_contents = ((t_word *) garray_vec(x->array));
             int array_size = garray_npoints(x->array);
+            post("websockets_server: size %i", array_size);
+
             int number_of_chunks = (array_size + CHUNK_SIZE - 1) / CHUNK_SIZE; // Division rounding up
-            error("Num Chun %i", number_of_chunks);
             int i;
             for (i=0; i<number_of_chunks; i++) {
                // Assemble the message
@@ -303,11 +305,11 @@ static void websocket_server_connect(t_websocket_server *x, t_floatarg port_numb
       return;
    }
 
+   websocket_server_free(x);
+
    if(port_number != 0.0){
       x->port_number = port_number;
    } 
-
-   websocket_server_free(x);
 
    // create libwebsocket context to represent this server
    struct lws_context_creation_info info;
