@@ -127,9 +127,6 @@ define(function() {
             case 'dbm-send':
                PD._didReceiveSend(message.substr(i+1));
                break;
-            case 'dbm-read-array':
-               PD._didReadArray(message.substr(i+1));
-               break;
             case 'dbm-bendout':
             case 'dbm-ctlout':
             case 'dbm-midiout':
@@ -139,9 +136,11 @@ define(function() {
             case 'dbm-touchout':
                PD._didReceiveMidi(cmd, message.substr(i+1));
                break;
-
+            case 'dbm-read-array':
+               PD._didReadArray(message.substr(i+1));
+               break;
             default:
-               // code
+               break;
          }
       },
 
@@ -176,7 +175,7 @@ define(function() {
       /**
        * Send a symbol message to the PD patch
        *
-       * @mehod sendFloat
+       * @mehod sendSymbol
        */
       sendSymbol: function(value, receiver){
          var msg = 'dbm-send-symbol ' +  receiver +' '+ value;
@@ -264,7 +263,8 @@ define(function() {
       },
 
       /**
-       * Reads contents of an array or table object in the PD patch.
+       * Reads contents of an array or table object in the PD patch. 
+       * If n is 0, the whole array is returned
        *
        * @mehod readArray
        */
@@ -273,18 +273,29 @@ define(function() {
          this._websocket.send('dbm-read-array ' + arrayName);
       },
 
+      _readArrayData: [],
+
       _readArrayCallbacks: [],
 
       _didReadArray: function(data){
-         cbk = PD._readArrayCallbacks[0];
-         if(typeof cbk == 'function'){
-            // Split data into an array and get rid of first element (array name)
-            var offset = PD._readArrayCallbacks[3];
-            var n = PD._readArrayCallbacks[2];
-            var points = data.split(' ');
-            points.shift();
-            points = points.slice(offset, offset+n);
-            cbk(points);
+         var data = data.split(' ');
+         if(data[1]=='start'){
+            _readArrayData = [];
+            data.shift();
+         }
+         data.shift();
+         _readArrayData = _readArrayData.concat(data);
+         if(data[data.length-1] == 'end'){
+            _readArrayData.pop();
+            cbk = PD._readArrayCallbacks[0];
+            if(typeof cbk == 'function'){
+               var offset = PD._readArrayCallbacks[3];
+               var n = PD._readArrayCallbacks[2];
+               if(n!=0){
+                  _readArrayData = _readArrayData.slice(offset, offset+n);
+               }
+               cbk(_readArrayData);
+            }
          }
       },
 
@@ -464,4 +475,4 @@ define(function() {
 
    };
    return PD;
-});
+})

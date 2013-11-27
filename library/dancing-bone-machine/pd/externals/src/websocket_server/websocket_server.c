@@ -24,7 +24,8 @@
 #include "m_pd.h"
 #include "s_stuff.h"
 
-#define MAX_MESSAGE_SIZE 20000
+#define MAX_MESSAGE_SIZE 1000000
+#define CHUNK_SIZE 8192
 
 /**
  * Datasructure to hold the instance variables for each websocket_server
@@ -117,27 +118,51 @@ static int websocket_server_callback_pd(struct libwebsocket_context * this, stru
          }
            
          if(x->need_to_send_array){
+            // Arrays can be quite big, split into multiple messages
+            // First message will look like "dbm-read-array array-name start 0.1 0.2 ..." 
+            // Subsequent messages will look like "dbm-read-array array-name 0.1 0.2 ..." 
+            // Last message will look like "dbm-read-array array-name 0.1 0.2 ... end" 
             t_word *array_contents = ((t_word *) garray_vec(x->array));
-
-            // Assemble the message
-            char* msg = &(x->message[LWS_SEND_BUFFER_PRE_PADDING]);
-            strcpy(msg, "dbm-read-array ");
-            strcat(msg, x->array_name);
-            strcat(msg, " ");
-            char str[MAXPDSTRING] = "";
+            int array_size = garray_npoints(x->array);
+            int number_of_chunks = (array_size + CHUNK_SIZE - 1) / CHUNK_SIZE; // Division rounding up
+            error("Num Chun %i", number_of_chunks);
             int i;
-            for (i=0; i<garray_npoints(x->array); i++) {
-               modp_dtoa(array_contents[i].w_float, str, 6); // This is a faster equivalent to snprintf(str, MAXPDSTRING, "%f", array_contents[i].w_float);
-               if(strlen(msg) + strlen(str) >= MAX_MESSAGE_SIZE){
-                  error("websockets_server: message too long, truncating.");
-                  break;
-               }
-               strcat(msg, str);
+            for (i=0; i<number_of_chunks; i++) {
+               // Assemble the message
+               char* msg = &(x->message[LWS_SEND_BUFFER_PRE_PADDING]);
+               strcpy(msg, "dbm-read-array ");
+               strcat(msg, x->array_name);
                strcat(msg, " ");
+               if(i==0){
+                  strcat(msg, "start ");
+               }
+               char str[MAXPDSTRING] = "";
+               int j;
+               for (j=0; j<CHUNK_SIZE; j++) {
+                  int index = i*CHUNK_SIZE + j;
+                  if(array_size > index){
+                     modp_dtoa(array_contents[index].w_float, str, 6); // This is a faster equivalent to snprintf(str, MAXPDSTRING, "%f", array_contents[i].w_float);
+                     if(strlen(msg) + strlen(str) >= MAX_MESSAGE_SIZE){
+                        error("websockets_server: message too long, truncating.");
+                        break;
+                     }
+                     strcat(msg, str);
+                     strcat(msg, " ");
+                  }
+               }
+               msg[strlen(msg)-1]=0; // remove trailing space
+               if(i==number_of_chunks-1){
+                  strcat(msg, " end");
+               }
+               int length = strlen(msg);
+               libwebsocket_write(wsi, (unsigned char*)msg, length, LWS_WRITE_TEXT);
             }
-            msg[strlen(msg)-1]=0; // remove trailing space
-            int length = strlen(msg);
-            libwebsocket_write(wsi, (unsigned char*)msg, length, LWS_WRITE_TEXT);
+
+            // If I wanted to send as binary data:
+            /* int length = garray_npoints( x->array ); */
+            /* memcpy(msg, array_contents, sizeof(t_word)*length); */
+            /* libwebsocket_write(wsi, (unsigned char*)msg, sizeof(t_word)*length, LWS_WRITE_BINARY); */
+
             x->need_to_send_array = 0;
             pthread_mutex_unlock(&(x->message_mutex));
          } 
