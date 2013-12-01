@@ -66,6 +66,21 @@ define(function() {
          if(typeof success != 'undefined') success();
       },
 
+      /**
+       * Wrapper for websocket.send
+       *
+       * @method _send
+       * @private
+       */
+      _send: function(msg){
+         if(typeof this._websocket == 'undefined'){
+            console.log("Trying to send message with websocket, but there's no connection.");
+            console.log("Message: " + msg);
+            return;
+         }
+         this._websocket.send(msg);
+      },
+
 
       initialize: function(success, error){
          this._doNothing(success);
@@ -159,7 +174,7 @@ define(function() {
        */
       sendBang: function(receiver){
          var msg = 'dbm-send-bang ' +  receiver;
-         this._websocket.send(msg);
+         this._send(msg);
       },
 
       /**
@@ -169,7 +184,7 @@ define(function() {
        */
       sendFloat: function(value, receiver){
          var msg = 'dbm-send-float ' +  receiver +' '+ value;
-         this._websocket.send(msg);
+         this._send(msg);
       },
 
       /**
@@ -179,7 +194,7 @@ define(function() {
        */
       sendSymbol: function(value, receiver){
          var msg = 'dbm-send-symbol ' +  receiver +' '+ value;
-         this._websocket.send(msg);
+         this._send(msg);
       },
 
       /**
@@ -190,7 +205,7 @@ define(function() {
       sendList: function(list, receiver){
          var msg = list.join(' ');
          msg = ['dbm-send-list', receiver, msg].join(' ');
-         this._websocket.send(msg);
+         this._send(msg);
       },
 
       /**
@@ -204,7 +219,7 @@ define(function() {
          this._unimplemented();
          // var msg = list.join(' ');
          // msg = ['dbm-send-message', receiver+';', symbol, msg].join(' ');
-         // this._websocket.send(msg);
+         // this._send(msg);
       },
 
 
@@ -219,7 +234,7 @@ define(function() {
       bind: function(sender, callback){
          this._bindCallbacks[sender] = callback;
          var msg = 'dbm-bind ' +  sender;
-         this._websocket.send(msg);
+         this._send(msg);
       },
 
       _bindCallbacks: {}, 
@@ -255,7 +270,7 @@ define(function() {
        */
       unbindAll: function(){
          var msg = 'dbm-unbind-all bang';
-         this._websocket.send(msg);
+         this._send(msg);
       },
 
       arraySize: function(arrayName, success, error){
@@ -270,7 +285,7 @@ define(function() {
        */
       readArray: function(arrayName, n, offset, success, error){
          this._readArrayCallbacks = [success, error, n, offset];
-         this._websocket.send('dbm-read-array ' + arrayName);
+         this._send('dbm-read-array ' + arrayName);
       },
 
       _readArrayData: [],
@@ -310,39 +325,39 @@ define(function() {
        * @method sendNoteOn
        */
       sendNoteOn: function(channel, pitch, velocity){
-         this._websocket.send('dbm-notein ' + channel +' '+ pitch +' '+ velocity);
+         this._send('dbm-notein ' + channel +' '+ pitch +' '+ velocity);
       },
 
       sendControlChange: function(channel, controller, value){ 
-         this._websocket.send('dbm-ctlin ' + channel +' '+ controller +' '+ value);
+         this._send('dbm-ctlin ' + channel +' '+ controller +' '+ value);
       },
 
       sendProgramChange: function(channel, program){ 
-         this._websocket.send('dbm-pgmin ' + channel +' '+ program);
+         this._send('dbm-pgmin ' + channel +' '+ program);
       },
 
       sendPitchBend: function(channel, value){ 
-         this._websocket.send('dbm-bendin ' + channel +' '+ value);
+         this._send('dbm-bendin ' + channel +' '+ value);
       },
 
       sendAfterTouch: function(channel, value){ 
-         this._websocket.send('dbm-touchin ' + channel +' '+ value);
+         this._send('dbm-touchin ' + channel +' '+ value);
       },
 
       sendPolyAfterTouch: function(channel, pitch, value){ 
-         this._websocket.send('dbm-polytouchin ' + channel +' '+ pitch +' '+ value);
+         this._send('dbm-polytouchin ' + channel +' '+ pitch +' '+ value);
       },
 
       sendMidiByte: function(port, value){ 
-         this._websocket.send('dbm-midiin ' + port +' '+ value);
+         this._send('dbm-midiin ' + port +' '+ value);
       },
 
       sendSysEx: function(port, value){ 
-         this._websocket.send('dbm-sysexin ' + port +' '+ value);
+         this._send('dbm-sysexin ' + port +' '+ value);
       },
 
       sendSysRealTime: function(port, value){ 
-         this._websocket.send('dbm-midirealtimein ' + port +' '+ value);
+         this._send('dbm-midirealtimein ' + port +' '+ value);
       },
 
       _didReceiveMidi: function(cmd, msg){
@@ -462,7 +477,7 @@ define(function() {
        */
       setActive: function(active){
          var msg = 'dbm-active ' + active;
-         this._websocket.send(msg);
+         this._send(msg);
       },
 
       /**
