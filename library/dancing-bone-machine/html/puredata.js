@@ -147,15 +147,14 @@ define(function() {
       //    this._unimplemented(); 
       // },
 
-      // /**
-      //  * Send a bang message to the PD patch
-      //  *
-      //  * @mehod sendBang
-      //  */
-      // sendBang: function(receiver){
-      //    var msg = 'ds-send-bang ' +  receiver;
-      //    this._websocket.send(msg);
-      // },
+      /**
+       * Send a bang message to the PD patch
+       *
+       * @method sendBang
+       */
+      sendBang: function(receiver){
+         cordova.exec(null, null, "PureData", "sendBang", [receiver]);
+      },
 
       /**
        * Send a message to the PD patch
@@ -164,15 +163,14 @@ define(function() {
          cordova.exec(null, null, "PureData", "sendFloat", [num, receiver]);
       },
 
-      // /**
-      //  * Send a symbol message to the PD patch
-      //  *
-      //  * @mehod sendFloat
-      //  */
-      // sendSymbol: function(value, receiver){
-      //    var msg = 'ds-send-symbol ' +  receiver +' '+ value;
-      //    this._websocket.send(msg);
-      // },
+     /**
+      * Send a symbol message to the PD patch
+      *
+      * @mehod sendFloat
+      */
+     sendSymbol: function(value, receiver){
+       cordova.exec(null, null, "PureData", "sendSymbol", [value, receiver]);
+     },
 
       // /**
       //  * Send a list message to the PD patch
@@ -200,36 +198,28 @@ define(function() {
       // },
 
 
-      // /**
-      //  * Subscribe to sends from pd patch.
-      //  * Ex: PD.bind('gain', function(msg){
-      //  *         console.log(msg);
-      //  *     })
-      //  *
-      //  * @mehod bind
-      //  */
-      // bind: function(sender, callback){
-      //    this._bindCallbacks[sender] = callback;
-      //    var msg = 'ds-bind ' +  sender;
-      //    this._websocket.send(msg);
-      // },
+     /**
+      * Subscribe to sends from pd patch.
+      * Ex: PD.bind('gain', function(msg){
+      *         console.log(msg);
+      *     })
+      *
+      * @mehod bind
+      */
+     bind: function(sender, callback){
+       PD._bindCallbacks[sender] = callback;
+       cordova.exec(null, null, "PureData", "bind", [sender]);
+     },
 
-      // _bindCallbacks: {}, 
+     _bindCallbacks: {},
 
-      // _didReceiveSend: function(msg){
-      //    var i = msg.indexOf(' ');
-      //    var sendName;
-      //    if(i == -1){
-      //       sendName = msg;
-      //       msg = 'bang';
-      //    }
-      //    else{
-      //       sendName = msg.substring(0,i);
-      //       msg = msg.substr(i+1);
-      //    }
-      //    var callback = PD._bindCallbacks[sendName];
-      //    if(typeof callback == 'function') callback(msg);
-      // },
+     _didReceiveSend: function(msg){
+       var i = msg.indexOf(' ');
+       var sendName = msg.substring(0,i);
+       msg = msg.substr(i+1);
+        var callback = PD._bindCallbacks[sendName];
+        if(typeof callback == 'function') callback(msg);
+     },
 
       // /**
       //  * Unsubscribe from sends from pd patch.
@@ -462,6 +452,13 @@ define(function() {
       // getActive: function(success, error){
       //    this._doNothing(success);
       // },
+       
+       /**
+        * Show media picker for the user to select an audio file and converts it to wav so that pd can open it.
+        */
+       showMediaPicker: function(success, error){
+          cordova.exec(success, error, "PureData", "showMediaPicker", []);
+       }
    };
    return PD;
 });

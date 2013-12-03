@@ -489,6 +489,20 @@ define(function() {
          this._doNothing(success);
       },
 
+      /**
+       * Simulate what a media picker would return
+       */
+      showMediaPicker: function(success, error){
+         setTimeout(function(){
+            success({
+               title: 'I am the Walrus',
+               album: 'Magical Mystery Tour',
+               artist: 'The Beatles',
+               path: '/Users/rafa/Desktop/IAmTheWalrus-MagicalMysteryTour-TheBeatles.caf',
+               builtIn: false
+            });
+         },2000);
+      },
    };
    return PD;
 })

@@ -204,7 +204,16 @@
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
   }];
 }
-    
+
+- (void)showMediaPicker:(CDVInvokedUrlCommand*)command {
+    MPMediaPickerController *pickerController =	[[MPMediaPickerController alloc] initWithMediaTypes: MPMediaTypeAnyAudio];
+    pickerController.prompt = @"Choose an audio track";
+    pickerController.allowsPickingMultipleItems = NO;
+    pickerController.delegate = self;
+    _currentCommand = command;
+    [self.viewController presentViewController:pickerController animated:YES completion:nil];
+}
+
 
 // TODO: where should I put this?
 /* [PdBase setDelegate:self]; */
@@ -212,4 +221,146 @@
   NSLog(@"Pd Console: %@", message);
 }
 
+
+////////////////////////////////////////////////////////////////////////
+#pragma mark --
+#pragma mark Media Picker
+- (void)mediaPicker: (MPMediaPickerController *)mediaPicker didPickMediaItems:(MPMediaItemCollection *)mediaItemCollection {
+    [self.viewController dismissModalViewControllerAnimated:YES];
+    [self.commandDelegate runInBackground:^{
+        __block CDVPluginResult* pluginResult = nil;
+        NSString* msg = nil;
+        
+        if ([mediaItemCollection count] < 1) {
+            msg = @"No audio track was chosen";
+            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:msg];
+            return;
+        }
+        MPMediaItem* song = [[mediaItemCollection items] objectAtIndex:0];
+        NSString* songTitle = [song valueForProperty:MPMediaItemPropertyTitle]!=nil ? [song valueForProperty:MPMediaItemPropertyTitle] : @"";
+        NSString* songAlbum = [song valueForProperty:MPMediaItemPropertyAlbumTitle] ? [song valueForProperty:MPMediaItemPropertyAlbumTitle] : @"";
+        NSString* songArtist = [song valueForProperty:MPMediaItemPropertyArtist] ? [song valueForProperty:MPMediaItemPropertyArtist] : @"";
+        
+        /////////////////////////////////////
+        // Begin converting song
+        
+        NSString* newFileName = [NSString stringWithFormat:@"%@-%@-%@", songTitle, songAlbum, songArtist];
+        NSCharacterSet* illegalFileNameCharacters = [NSCharacterSet characterSetWithCharactersInString:@"./\\?%*|\"<> "];
+        newFileName = [[newFileName componentsSeparatedByCharactersInSet:illegalFileNameCharacters] componentsJoinedByString:@""];
+        newFileName = [NSString stringWithFormat:@"%@.caf", newFileName];
+        
+        // set up an AVAssetReader to read from the iPod Library
+        NSURL *assetURL = [song valueForProperty:MPMediaItemPropertyAssetURL];
+        AVURLAsset *songAsset = [AVURLAsset URLAssetWithURL:assetURL options:nil];
+        
+        NSError *assetError = nil;
+        AVAssetReader *assetReader = [AVAssetReader assetReaderWithAsset:songAsset error:&assetError];
+        if(assetError) {
+            msg = [NSString stringWithFormat:@"Error: %@", assetError];
+            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:msg];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:_currentCommand.callbackId];
+            return;
+        }
+        
+        AVAssetReaderOutput *assetReaderOutput = [AVAssetReaderAudioMixOutput assetReaderAudioMixOutputWithAudioTracks:songAsset.tracks audioSettings: nil];
+        if (! [assetReader canAddOutput: assetReaderOutput]) {
+            msg = @"Can't add reader output.";
+            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:msg];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:_currentCommand.callbackId];
+            return;
+        }
+        [assetReader addOutput: assetReaderOutput];
+        
+        NSArray *dirs = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+        NSString *documentsDirectoryPath = [dirs objectAtIndex:0];
+        NSString *exportPath = [documentsDirectoryPath stringByAppendingPathComponent:newFileName];
+        if ([[NSFileManager defaultManager] fileExistsAtPath:exportPath]) {
+            [[NSFileManager defaultManager] removeItemAtPath:exportPath error:nil];
+        }
+        NSURL *exportURL = [NSURL fileURLWithPath:exportPath];
+        AVAssetWriter *assetWriter = [AVAssetWriter assetWriterWithURL:exportURL fileType:AVFileTypeCoreAudioFormat error:&assetError];
+        if (assetError) {
+            msg = [NSString stringWithFormat:@"Error: %@", assetError];
+            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:msg];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:_currentCommand.callbackId];
+            return;
+        }
+        AudioChannelLayout channelLayout;
+        memset(&channelLayout, 0, sizeof(AudioChannelLayout));
+        channelLayout.mChannelLayoutTag = kAudioChannelLayoutTag_Stereo;
+        NSDictionary *outputSettings = [NSDictionary dictionaryWithObjectsAndKeys:
+                                        [NSNumber numberWithInt:kAudioFormatLinearPCM], AVFormatIDKey,
+                                        [NSNumber numberWithFloat:44100.0], AVSampleRateKey,
+                                        [NSNumber numberWithInt:2], AVNumberOfChannelsKey,
+                                        [NSData dataWithBytes:&channelLayout length:sizeof(AudioChannelLayout)], AVChannelLayoutKey,
+                                        [NSNumber numberWithInt:16], AVLinearPCMBitDepthKey,
+                                        [NSNumber numberWithBool:NO], AVLinearPCMIsNonInterleaved,
+                                        [NSNumber numberWithBool:NO],AVLinearPCMIsFloatKey,
+                                        [NSNumber numberWithBool:NO], AVLinearPCMIsBigEndianKey,
+                                        nil];
+        AVAssetWriterInput *assetWriterInput = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeAudio outputSettings:outputSettings];
+        if ([assetWriter canAddInput:assetWriterInput]) {
+            [assetWriter addInput:assetWriterInput];
+        } else {
+            msg = @"Can't add asset writer input.";
+            pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:msg];
+            [self.commandDelegate sendPluginResult:pluginResult callbackId:_currentCommand.callbackId];
+            return;
+        }
+        
+        assetWriterInput.expectsMediaDataInRealTime = NO;
+        
+        [assetWriter startWriting];
+        [assetReader startReading];
+        
+        AVAssetTrack *soundTrack = [songAsset.tracks objectAtIndex:0];
+        CMTime startTime = CMTimeMake (0, soundTrack.naturalTimeScale);
+        [assetWriter startSessionAtSourceTime: startTime];
+        
+        __block UInt64 convertedByteCount = 0;
+        
+        dispatch_queue_t mediaInputQueue = dispatch_queue_create("mediaInputQueue", NULL);
+        [assetWriterInput requestMediaDataWhenReadyOnQueue:mediaInputQueue usingBlock: ^{
+            while (assetWriterInput.readyForMoreMediaData) {
+                CMSampleBufferRef nextBuffer = [assetReaderOutput copyNextSampleBuffer];
+                if (nextBuffer) {
+                    // append buffer
+                    [assetWriterInput appendSampleBuffer: nextBuffer];
+                    convertedByteCount += CMSampleBufferGetTotalSampleSize (nextBuffer);
+                    //NSNumber *convertedByteCountNumber = [NSNumber numberWithLong:convertedByteCount];
+                    //[self performSelectorOnMainThread:@selector(updateSizeLabel:) withObject:convertedByteCountNumber waitUntilDone:NO];
+                } else {
+                    // done!
+                    [assetWriterInput markAsFinished];
+                    [assetWriter finishWriting];
+                    [assetReader cancelReading];
+                    
+                    NSDictionary* returnValues = [NSDictionary dictionaryWithObjectsAndKeys:
+                                            songTitle, @"title",
+                                            songAlbum, @"album",
+                                            songArtist, @"artist",
+                                            exportPath, @"path",
+                                            nil];
+                    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:returnValues];
+                    [self.commandDelegate sendPluginResult:pluginResult callbackId:_currentCommand.callbackId];
+
+                    //NSDictionary *outputFileAttributes = [[NSFileManager defaultManager] attributesOfItemAtPath:exportPath error:nil];
+                    //NSLog (@"done. file size is %lld", [outputFileAttributes fileSize]);
+                    //NSNumber *doneFileSize = [NSNumber numberWithLong:[outputFileAttributes fileSize]];
+                    //[self performSelectorOnMainThread:@selector(updateCompletedSizeLabel:) withObject:doneFileSize waitUntilDone:NO];
+                    break;
+                }
+            }
+        }];
+    }];
+}
+
+- (void)mediaPickerDidCancel:(MPMediaPickerController *)mediaPicker {
+    [self.viewController dismissModalViewControllerAnimated:YES];
+    [self.commandDelegate runInBackground:^{
+        NSString* msg = [NSString stringWithFormat:@"User cancelled selection"];
+        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:msg];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:_currentCommand.callbackId];
+    }];
+}
 @end

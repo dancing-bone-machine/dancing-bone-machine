@@ -19,14 +19,20 @@
 
 #import <Foundation/Foundation.h>
 #import <Cordova/CDV.h>
+#import <AudioToolbox/AudioToolbox.h> // for the core audio constants
+#import <MediaPlayer/MediaPlayer.h>
+#import <AVFoundation/AVFoundation.h>
+
 #import "PdBase.h"
 #import "PdAudioController.h"
 
 #define MAX_ARRAY_SIZE 8192
 
-@interface PureData : CDVPlugin <PdReceiverDelegate>{
-float* readArrayBuffer;  
-NSMutableArray* readArrayArray;
+@interface PureData : CDVPlugin <PdReceiverDelegate, MPMediaPickerControllerDelegate>{
+    float* readArrayBuffer;
+    NSMutableArray* readArrayArray;
+    
+    CDVInvokedUrlCommand* _currentCommand;
 }
 
 

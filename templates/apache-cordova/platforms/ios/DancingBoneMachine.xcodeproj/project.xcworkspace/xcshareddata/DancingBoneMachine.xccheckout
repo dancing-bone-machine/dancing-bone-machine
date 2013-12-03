@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>04918AE9-9010-4477-A17A-09221D3C2F6D</string>
+	<key>IDESourceControlProjectName</key>
+	<string>DancingBoneMachine</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>7EE6E247-2BEE-4EAA-9676-4B559E337B13</key>
+		<string>http://git.elsoftwarehamuerto.org/cosmonautcoach.git</string>
+		<key>D43A4D9A-B1A9-4127-A224-8C1261BB6E0B</key>
+		<string>https://github.com/dancing-bone-machine/dancing-bone-machine.git</string>
+		<key>DB36D09C-15D9-460E-AB26-0237F6E285BC</key>
+		<string>https://github.com/dancing-bone-machine/libpd.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>dbm/templates/apache-cordova/platforms/ios/DancingBoneMachine.xcodeproj/project.xcworkspace</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>7EE6E247-2BEE-4EAA-9676-4B559E337B13</key>
+		<string>../../../../../../..</string>
+		<key>D43A4D9A-B1A9-4127-A224-8C1261BB6E0B</key>
+		<string>../../../../../..</string>
+		<key>DB36D09C-15D9-460E-AB26-0237F6E285BC</key>
+		<string>../../../../../../library/vendors/pd-for-ios/libpd</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://github.com/dancing-bone-machine/dancing-bone-machine.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>110</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>7EE6E247-2BEE-4EAA-9676-4B559E337B13</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>D43A4D9A-B1A9-4127-A224-8C1261BB6E0B</string>
+			<key>IDESourceControlWCCName</key>
+			<string>dbm</string>
+		</dict>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>DB36D09C-15D9-460E-AB26-0237F6E285BC</string>
+			<key>IDESourceControlWCCName</key>
+			<string>libpd</string>
+		</dict>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>7EE6E247-2BEE-4EAA-9676-4B559E337B13</string>
+			<key>IDESourceControlWCCName</key>
+			<string>repo</string>
+		</dict>
+	</array>
+</dict>
+</plist>
