@@ -24,15 +24,17 @@
 #import <AVFoundation/AVFoundation.h>
 
 #import "PdBase.h"
+#import "PdDispatcher.h"
 #import "PdAudioController.h"
 
-#define MAX_ARRAY_SIZE 8192
+#define MAX_ARRAY_SIZE 100000
 
 @interface PureData : CDVPlugin <PdReceiverDelegate, MPMediaPickerControllerDelegate>{
     float* readArrayBuffer;
     NSMutableArray* readArrayArray;
     
     CDVInvokedUrlCommand* _currentCommand;
+    PdDispatcher* _pdDispatcher;
 }
 
 

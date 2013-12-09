@@ -49,6 +49,7 @@
    [super pluginInitialize];
    readArrayBuffer = (float*)malloc(MAX_ARRAY_SIZE*sizeof(float));
    readArrayArray = [NSMutableArray arrayWithCapacity:MAX_ARRAY_SIZE];
+    _pdDispatcher = [[PdDispatcher alloc] init];
 }
 
 - (void)dispose {
@@ -71,6 +72,41 @@
   return _audioController;
 }
 
+////////////////////////////////////////////////////////////////////////
+#pragma mark --
+#pragma mark bind stuff (receive messages from pd)
+
+- (void)sendReceivedMessageToJS:(NSString *)msg{
+    NSString* js = [NSString stringWithFormat:@"PD._didReceiveSend(\"%@\")", msg];
+    [self.commandDelegate evalJs:js];
+}
+
+- (void)receiveBangFromSource:(NSString *)source{
+    NSString* msg = [NSString stringWithFormat:@"%@ bang", source];
+    [self sendReceivedMessageToJS:msg];
+}
+
+- (void)receiveFloat:(float)received fromSource:(NSString *)source{
+    NSString* msg = [NSString stringWithFormat:@"%@ %f", source, received];
+    [self sendReceivedMessageToJS:msg];
+}
+
+- (void)receiveSymbol:(NSString *)symbol fromSource:(NSString *)source{
+    NSLog(@"Unimplemented Puredata.m:80");
+}
+
+- (void)receiveList:(NSArray *)list fromSource:(NSString *)source{
+    NSLog(@"Unimplemented Puredata.m:80");
+}
+
+- (void)receiveMessage:(NSString *)message withArguments:(NSArray *)arguments fromSource:(NSString *)source{
+    NSLog(@"Unimplemented Puredata.m:80");
+}
+
+- (void)bind:(CDVInvokedUrlCommand*)command {
+    NSString* sender = (NSString*)[command.arguments objectAtIndex:0];
+    [_pdDispatcher addListener:self forSource:sender];
+}
 ////////////////////////////////////////////////////////////////////////
 #pragma mark --
 #pragma mark Javascript Visible Methods
@@ -131,7 +167,8 @@
 - (void)openFile:(CDVInvokedUrlCommand*)command {
   NSString* dir = [command.arguments objectAtIndex:0];
   __block NSString* fileName = [command.arguments objectAtIndex:1];
-  __block NSString* path = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:dir]; [self.commandDelegate runInBackground:^{ 
+  __block NSString* path = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:dir];
+  [self.commandDelegate runInBackground:^{
     CDVPluginResult* pluginResult = nil;
     if([PdBase openFile:fileName path:path]==nil){
       NSString* msg = [NSString stringWithFormat:@"Could not open PD patch %@/%@", path, fileName];
@@ -182,10 +219,36 @@
 
 }
 
+- (void)sendBang:(CDVInvokedUrlCommand*)command {
+    NSString* receiver = [command.arguments objectAtIndex:0];
+    
+    [PdBase sendBangToReceiver:receiver];
+    
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    
+}
+
+- (void)sendSymbol:(CDVInvokedUrlCommand*)command {
+    NSString* value = [command.arguments objectAtIndex:0];
+    NSString* receiver = [command.arguments objectAtIndex:1];
+    
+    [PdBase sendSymbol:value toReceiver:receiver];
+    
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    
+}
+
 - (void)readArray:(CDVInvokedUrlCommand*)command {
   NSString* arrayName = (NSString*)[command.arguments objectAtIndex:0];
   __block int n = [(NSNumber*)[command.arguments objectAtIndex:1] intValue];
   __block int offset = [(NSNumber*)[command.arguments objectAtIndex:2] intValue];
+    
+    if(n==0){
+        n = [PdBase arraySizeForArrayNamed:arrayName];
+    }
+    
   [self.commandDelegate runInBackground:^{
     CDVPluginResult* pluginResult = nil;
     if(n > MAX_ARRAY_SIZE) n = MAX_ARRAY_SIZE;
