@@ -253,7 +253,7 @@ SHARED_TCL_LIB = $(wildcard lib$(LIBRARY_NAME).tcl)
 
 .PHONY = install libdir_install single_install install-doc install-examples install-manual install-unittests clean distclean dist etags $(LIBRARY_NAME)
 
-all: $(SOURCES:.c=.$(EXTENSION)) $(SHARED_LIB) libwebsockets/build/lib/libwebsockets.a stringencoders/.libs/libmodpbase64.a
+all: libwebsockets/build/lib/libwebsockets.a stringencoders/.libs/libmodpbase64.a $(SOURCES:.c=.$(EXTENSION)) $(SHARED_LIB)
 
 # Open help patch and html client
 run: all
@@ -365,6 +365,7 @@ distclean: clean
 	-rm -f -- $(ORIGDIR).tar.gz
 	-rm -rf -- $(ORIGDIR)
 	-rm -rf libwebsockets/build
+	cd stringencoders && make distclean
 
 
 $(DISTBINDIR):

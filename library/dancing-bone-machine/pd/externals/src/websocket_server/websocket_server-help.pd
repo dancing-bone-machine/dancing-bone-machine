@@ -1,4 +1,4 @@
-#N canvas 6 406 541 351 10;
+#N canvas 561 104 539 377 10;
 #X obj 62 196 list trim;
 #X obj 15 326 print foo;
 #X obj 95 293 print bar;
@@ -15,6 +15,7 @@
 #X msg 12 14 connect;
 #X msg 62 39 connect 9001;
 #X obj 62 155 websocket_server 9000;
+#X obj 376 343 websocket_server-meta;
 #X connect 0 0 4 0;
 #X connect 3 0 1 0;
 #X connect 4 0 3 0;

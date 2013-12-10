@@ -20,6 +20,7 @@ Build Instructions
 
         cd /path/to/this/directory
         make
+        make         # Not sure why but on my machine, I have to issue make a second time for the linker to kick in.
         make install #(optional, will try to copy the compiled external to ../../bin)
 
 License
