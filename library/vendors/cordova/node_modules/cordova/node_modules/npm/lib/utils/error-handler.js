@@ -44,7 +44,7 @@ process.on("exit", function (code) {
 })
 
 function exit (code, noLog) {
-  exitCode = exitCode || code
+  exitCode = exitCode || process.exitCode || code
 
   var doExit = npm.config.get("_exit")
   log.verbose("exit", [code, doExit])
@@ -233,6 +233,21 @@ function errorHandler (er) {
               ,"In most cases you are behind a proxy or have bad network settings."
               ,"\nIf you are behind a proxy, please make sure that the"
               ,"'proxy' config is set properly.  See: 'npm help config'"
+              ].join("\n"))
+    break
+
+  case "ENOPACKAGEJSON":
+    log.error("package.json", [er.message
+              ,"This is most likely not a problem with npm itself."
+              ,"npm can't find a package.json file in your current directory."
+              ].join("\n"))
+    break
+
+  case "ETARGET":
+    log.error("notarget", [er.message
+              ,"This is most likely not a problem with npm itself."
+              ,"In most cases you or one of your dependencies are requesting"
+              ,"a package version that doesn't exist."
               ].join("\n"))
     break
 

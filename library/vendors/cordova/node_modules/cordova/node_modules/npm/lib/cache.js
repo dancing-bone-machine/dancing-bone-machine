@@ -712,12 +712,14 @@ function installTargetsError (requested, data) {
   requested = data.name + (requested ? "@'" + requested + "'" : "")
 
   targets = targets.length
-          ? "Valid install targets:\n" + JSON.stringify(targets)
+          ? "Valid install targets:\n" + JSON.stringify(targets) + "\n"
           : "No valid targets found.\n"
           + "Perhaps not compatible with your version of node?"
 
-  return new Error( "No compatible version found: "
+  var er = new Error( "No compatible version found: "
                   + requested + "\n" + targets)
+  er.code = "ETARGET"
+  return er
 }
 
 function addNameVersion (name, v, data, cb) {
@@ -753,17 +755,20 @@ function addNameVersion (name, v, data, cb) {
     }
 
     // we got cached data, so let's see if we have a tarball.
-    fs.stat(path.join(npm.cache, name, ver, "package.tgz"), function (er, s) {
-      if (!er) readJson( path.join( npm.cache, name, ver
-                                  , "package", "package.json" )
-                       , function (er, data) {
+    var pkgroot = path.join(npm.cache, name, ver)
+    var pkgtgz = path.join(pkgroot, "package.tgz")
+    var pkgjson = path.join(pkgroot, "package", "package.json")
+    fs.stat(pkgtgz, function (er, s) {
+      if (!er) {
+        readJson(pkgjson, function (er, data) {
           er = needName(er, data)
           er = needVersion(er, data)
-          if (er && er.code !== "ENOENT" && er.code !== "ENOTDIR") return cb(er)
+          if (er && er.code !== "ENOENT" && er.code !== "ENOTDIR")
+            return cb(er)
           if (er) return fetchit()
           return cb(null, data)
         })
-      else return fetchit()
+      } else return fetchit()
     })
 
     function fetchit () {
@@ -772,11 +777,18 @@ function addNameVersion (name, v, data, cb) {
       }
 
       // use the same protocol as the registry.
-      // https registry --> https tarballs.
+      // https registry --> https tarballs, but
+      // only if they're the same hostname, or else
+      // detached tarballs may not work.
       var tb = url.parse(dist.tarball)
-      tb.protocol = url.parse(npm.config.get("registry")).protocol
-      delete tb.href
+      var rp = url.parse(npm.config.get("registry"))
+      if (tb.hostname === rp.hostname
+          && tb.protocol !== rp.protocol) {
+        tb.protocol = url.parse(npm.config.get("registry")).protocol
+        delete tb.href
+      }
       tb = url.format(tb)
+
       // only add non-shasum'ed packages if --forced.
       // only ancient things would lack this for good reasons nowadays.
       if (!dist.shasum && !npm.config.get("force")) {
@@ -1122,7 +1134,10 @@ function addLocalDirectory (p, name, shasum, cb) {
     getCacheStat(function (er, cs) {
       mkdir(path.dirname(tgz), function (er, made) {
         if (er) return cb(er)
-        tar.pack(tgz, p, data, false, function (er) {
+
+        var fancy = p.indexOf(npm.tmp) !== 0
+                    && p.indexOf(npm.cache) !== 0
+        tar.pack(tgz, p, data, fancy, function (er) {
           if (er) {
             log.error( "addLocalDirectory", "Could not pack %j to %j"
                      , p, tgz )
