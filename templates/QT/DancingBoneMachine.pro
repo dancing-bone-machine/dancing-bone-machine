@@ -24,7 +24,7 @@ MOC_DIR += obj
 macx{
 	RESOURCES_DIR = $$DESTDIR/DancingBoneMachine.app/Contents/MacOS
 	copy_resources.target = $$RESOURCES_DIR/res
-	copy_resources.commands = cp -R res $$RESOURCES_DIR
+	copy_resources.commands = cp -RL res $$RESOURCES_DIR
 }
 QMAKE_EXTRA_TARGETS += copy_resources
 POST_TARGETDEPS += $$RESOURCES_DIR/res
@@ -38,8 +38,8 @@ run.depends = $(TARGET)
 QMAKE_EXTRA_TARGETS += run
 
 # RTAudio Library
-rtaudio_dir = "../../library/vendors/rtaudio"
-rtaudio_lib = "../../library/vendors/rtaudio/librtaudio.a"
+rtaudio_dir = "rtaudio"
+rtaudio_lib = "raudio/librtaudio.a"
 rtaudio.target = $$rtaudio_lib
 macx{
    DEFINES += __MACOSX_CORE__ 
@@ -53,8 +53,8 @@ LIBS += -framework CoreFoundation
 LIBS += -framework CoreAudio
 
 # LibPD Library
-libpd_dir = "../../library/vendors/libpd"
-libpd_lib = "../../library/vendors/libpd/build/Release/libpd-osx.a"
+libpd_dir = "libpd"
+libpd_lib = "libpd/build/Release/libpd-osx.a"
 libpd.target = $$libpd_lib
 macx{
    libpd.commands = cd $$libpd_dir && xcodebuild -project libpd.xcodeproj -target libpd-osx -configuration Release
