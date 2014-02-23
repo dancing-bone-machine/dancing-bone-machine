@@ -9,9 +9,6 @@ QMAKE_CXXFLAGS += -O3
 # Input
 HEADERS += src/*.h
 SOURCES += src/*.cpp
-# RESOURCES += resources.qrc
-# DEPENDPATH += .
-# INCLUDEPATH += . src
 
 # Output
 DESTDIR = bin
@@ -39,7 +36,7 @@ QMAKE_EXTRA_TARGETS += run
 
 # RTAudio Library
 rtaudio_dir = "rtaudio"
-rtaudio_lib = "raudio/librtaudio.a"
+rtaudio_lib = "rtaudio/librtaudio.a"
 rtaudio.target = $$rtaudio_lib
 macx{
    DEFINES += __MACOSX_CORE__ 
