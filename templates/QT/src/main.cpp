@@ -10,11 +10,10 @@
 int main(int argv, char **args) {
    QApplication app(argv, args);
 
-   PdBridge bridge;
+   DBM::PdBridge* bridge = new DBM::PdBridge(&app);
 
    QString path = "file://" + QApplication::applicationDirPath() + "/res/html/index.html";
-   Window window(800, 600, path);
-   window.show();
+   new DBM::Window(525, 700, path, bridge, &app);
    
    return app.exec();
 }

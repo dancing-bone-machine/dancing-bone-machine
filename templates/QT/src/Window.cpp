@@ -22,95 +22,43 @@
 #include <QWebFrame>
 #include <QApplication>
 #include "Window.h"
+#include "WebPage.h"
 
-/**
- * Constructor
- *
- * @param width 
- * @param height
- * @param htmlFilePath 
- *    The html file must be compiled into the application binary and the url must staert with qrc:///
- * @param delegate 
- *    A subclass of WindowDelegate. 
- */
-Window::Window(int width, int height, QString htmlFilePath):
+// Constructor
+DBM::Window::Window(int width, int height, QString htmlFilePath, PdBridge* brdg, QObject* parent):
+QObject(parent),
 width(width),
 height(height),
-htmlFilePath(htmlFilePath)
+htmlFilePath(htmlFilePath),
+bridge(brdg)
 {
-   // delegate->setWindow(this);
+   console = new Console(this);
 
    window = new QMainWindow();
    window->setMaximumSize(width, height);
    window->setMinimumSize(width, height);
 
    webView = new QWebView(window);
+   WebPage* page = new WebPage(webView);
+   webView->setPage(page);
+   connectToJS();
+   connect( webView->page()->mainFrame(), SIGNAL(javaScriptWindowObjectCleared()), this, SLOT(connectToJS()) );
    webView->resize(width, height);
    webView->load(QUrl(htmlFilePath));
-   // connectToJS();
-   // connect( webView->page()->mainFrame(), SIGNAL(javaScriptWindowObjectCleared()), this, SLOT(connectToJS()) );
+
+   bridge->setPage(page);
+
+   window->show();
 };
 
-/**
- * Destructor
- */
-Window::~Window(){
-   delete webView;
+DBM::Window::~Window(){
    delete window;
 }
 
 /**
- * Shows the window on screen
- */
-void Window::show(){
-   window->show();
-}
-
-/**
- * Sends an event to the Javascript code within the WebKit instance.
- */
-// void Window::triggerGUIEvent(GUIEvent e){
-//    QString name = QString::fromUtf8(e.name);
-//    QString value = QString::number(e.value);
-//    QString json = "{name:\""+ name +"\", value:"+ value +"}";
-//    QString js = "ContainerWindow.didReceiveEvent("+ json +"); null;";
-//    // std::cout << qPrintable(js) << "\n";
-//    webView->page()->mainFrame()->evaluateJavaScript(js);
-// }
-
-/**
- * Receives an event from the Javascript code and sends it to the delegate.
- *
- * Note that we could ask WebKit to fire this event for us like 
- * 
- *     connect( webView, SIGNAL(loadFinished(bool)), this, SLOT(guiDidLoad(bool)) );
- * 
- * But we'll wait for javascript to trigger it instead. That gives the html application
- * to initialize itself before we start hitting it with events.
- *
- */
-// void Window::handleGUIEvent(QVariantMap event){
-//    
-//    // delegate->handleGUIEvent(e);
-// }
-  
-/**
- * Receives a "ready" event from Javascript and sends it to the delegate. 
- */
-// void Window::guiDidLoad(bool ok){
-//    delegate->guiDidLoad();
-// }
-
-/**
- * Provides a way for Javascript code to output messages to the outside.
- */
-// void Window::log(QString message){
-//    std::cout << qPrintable(message) << "\n";
-// }
-
-/**
  * Exposes this class to the javascript code.
  */
-// void Window::connectToJS(){
-//    webView->page()->mainFrame()->addToJavaScriptWindowObject(QString("ContainerWindow"), this);
-// }
+void DBM::Window::connectToJS(){
+   webView->page()->mainFrame()->addToJavaScriptWindowObject(QString("QT"), bridge);
+   webView->page()->mainFrame()->addToJavaScriptWindowObject(QString("console"), console);
+}

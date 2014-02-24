@@ -2,8 +2,8 @@
 
 int audioCallback(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames, double streamTime, RtAudioStreamStatus status, void *data){
 
-   float* out = (float*)outputBuffer;
-   float rand; 
+   // float* out = (float*)outputBuffer;
+   // float rand; 
    
    // Echo
    // if ( status ) std::cout << "Stream over/underflow detected." << std::endl;
@@ -17,21 +17,25 @@ int audioCallback(void *outputBuffer, void *inputBuffer, unsigned int nBufferFra
    //       out++;
    //    }
    // }
-   // (void)nBufferFrames;
-   // (void)streamTime;
+   (void)inputBuffer;
+   (void)outputBuffer;
+   (void)nBufferFrames;
+   (void)streamTime;
+   (void)status;
+   (void)data;
 
    return 0;
 }
 
-Audio::Audio(){
+DBM::Audio::Audio(){
 
 }
 
-Audio::~Audio(){
+DBM::Audio::~Audio(){
    this->stop();
 }
 
-void Audio::start(){
+void DBM::Audio::start(){
    if ( rtaudio.getDeviceCount() == 0 ) exit( 0 );
 
    // Get info for default audio device, choose the sample rate closer to 44100
@@ -76,7 +80,7 @@ void Audio::start(){
    // pd.init(1,2,44100);
 }
 
-void Audio::stop(){
+void DBM::Audio::stop(){
    if(rtaudio.isStreamRunning()) rtaudio.stopStream();
    if(rtaudio.isStreamOpen()) rtaudio.closeStream();
 };
