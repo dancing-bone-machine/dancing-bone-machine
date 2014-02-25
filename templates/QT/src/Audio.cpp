@@ -1,9 +1,14 @@
 #include "Audio.h"
 
-int audioCallback(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames, double streamTime, RtAudioStreamStatus status, void *data){
 
-   // float* out = (float*)outputBuffer;
-   // float rand; 
+int audioCallback(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames, double streamTime, RtAudioStreamStatus status, void *data){
+   float* out = (float*)outputBuffer;
+   float* in = (float*)inputBuffer;
+
+   // Process 1 tick, assuming block size of 64.
+   // std::cout << "p" << std::endl;
+   DBM::Audio::puredata.processFloat(1, in, out);
+   // std::cout << "d" << std::endl;
    
    // Echo
    // if ( status ) std::cout << "Stream over/underflow detected." << std::endl;
@@ -17,8 +22,8 @@ int audioCallback(void *outputBuffer, void *inputBuffer, unsigned int nBufferFra
    //       out++;
    //    }
    // }
-   (void)inputBuffer;
-   (void)outputBuffer;
+   // (void)inputBuffer;
+   // (void)outputBuffer;
    (void)nBufferFrames;
    (void)streamTime;
    (void)status;
@@ -27,16 +32,22 @@ int audioCallback(void *outputBuffer, void *inputBuffer, unsigned int nBufferFra
    return 0;
 }
 
-DBM::Audio::Audio(){
 
-}
+DBM::Audio::Audio(){ }
 
 DBM::Audio::~Audio(){
    this->stop();
 }
 
-void DBM::Audio::start(){
-   if ( rtaudio.getDeviceCount() == 0 ) exit( 0 );
+// define th static property puredata of type PdBase
+pd::PdBase DBM::Audio::puredata;
+
+unsigned int DBM::Audio::getSampleRate(){
+   return this->sampleRate;
+}
+
+int DBM::Audio::start(){
+   if ( rtaudio.getDeviceCount() == 0 ) return(0);
 
    // Get info for default audio device, choose the sample rate closer to 44100
    RtAudio::DeviceInfo device = rtaudio.getDeviceInfo( rtaudio.getDefaultOutputDevice() );
@@ -49,6 +60,8 @@ void DBM::Audio::start(){
          diff = abs(sampleRate - 44100);
       }
    }
+
+   puredata.init(2,2,sampleRate);
 
    // int i = rtaudio.getDefaultOutputDevice();
    // RtAudio::DeviceInfo info = rtaudio.getDeviceInfo(i);
@@ -74,13 +87,14 @@ void DBM::Audio::start(){
    }
    catch ( RtError& e ) {
       std::cout << '\n' << e.getMessage() << '\n' << std::endl;
-      exit( 0 );
+      return 0;
    }
 
-   // pd.init(1,2,44100);
+   return 1;
 }
 
-void DBM::Audio::stop(){
+int DBM::Audio::stop(){
    if(rtaudio.isStreamRunning()) rtaudio.stopStream();
    if(rtaudio.isStreamOpen()) rtaudio.closeStream();
+   return 1;
 };

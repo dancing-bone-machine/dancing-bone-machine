@@ -7,15 +7,17 @@
 namespace DBM{
    class Audio{
       public:
-         Audio();
-         ~Audio();
-         void start();
-         void stop();
+         explicit Audio();
+         virtual ~Audio();
+         int openPatch(std::string file, std::string path);
+         int start();
+         int stop();
+         unsigned int getSampleRate();
+         static pd::PdBase puredata;
 
       protected: 
          unsigned int sampleRate;
          unsigned int blockSize;
          RtAudio rtaudio;
-         pd::PdBase pd;
    };
 };

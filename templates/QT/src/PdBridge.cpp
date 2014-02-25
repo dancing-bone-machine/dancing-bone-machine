@@ -1,43 +1,63 @@
 #include <iostream>
-#include <QWebFrame>
+#include <QWebFrame>,
 #include <QMap>
+#include <QApplication>
 #include "PdBridge.h"
 
 
-DBM::PdBridge::PdBridge(QObject* parent) : QObject(parent){}
+DBM::PdBridge::PdBridge(QObject* parent) : QObject(parent){
+   audio = new Audio();
+}
+
+DBM::PdBridge::~PdBridge(){
+   delete audio;
+}
 
 void DBM::PdBridge::setPage(WebPage* page){
    this->page = page;
 }
-
-// void DBM::PdBridge::fireCallback(QString& callbackID, QVariantList& params){
-//    page->
-// }
    
 ////////////////////////////////////////////////////////////////////////////////
 // The following methods can be called from Javascript as members of a global
 // PD object. PD.configurePlayback(...) for example.
 
 
-// void PdBridge::configurePlayback(int sampleRate, int numberChannels, bool inputEnabled, bool mixingEnabled, QString callback){
-void DBM::PdBridge::configurePlayback(int sampleRate, int numberChannels, bool inputEnabled, bool mixingEnabled, QString callbackOK, QString callbackErr){
+void DBM::PdBridge::configurePlayback(int sampleRate, int numberChannels, bool inputEnabled, bool mixingEnabled, int callbackId){
    
-
-   std::cout << "C++ doing work for configure playback" << std::endl;
-   // std::cout << callbackOK << std::endl;
+   if(!audio->start()){
+      emit fireErrorCallback(callbackId+1, "Could not start audio engine.");
+      return;
+   }
 
    QVariantMap params;
-   params["pi"] = QVariant(3.1415);
-   params["msg"] = QVariant("Hi from C++");
+   params["sampleRate"] = QVariant(audio->getSampleRate());
+   params["numberChannels"] = QVariant(numberChannels);
+   params["inputEnabled"] = QVariant(inputEnabled);
+   params["mixingEnabled"] = QVariant(mixingEnabled);
 
-   // std::cout << qPrintable(params) << std::endl;
-
-   emit fireCallback(callbackOK, params);
-
-   // This parameter is not used in the C++ version, kept here to keep 
-   // compatibility with other runtimes.
-   // (void)mixingEnabled;
+   emit fireOKCallback(callbackId, params);
 }
+
+
+void DBM::PdBridge::openFile(QString path, QString fileName, int callbackId){
+   path = QApplication::applicationDirPath() + "/res/" + path;
+   pd::Patch patch = Audio::puredata.openPatch(fileName.toStdString(), path.toStdString());
+   if(!patch.isValid()) {
+      fireErrorCallback(callbackId+1, "Could not open patch");
+      return;
+   }
+   QVariantMap params;
+   fireOKCallback(callbackId, params);
+}
+
+void DBM::PdBridge::setActive(bool active){
+   Audio::puredata.computeAudio(active);
+}
+
+void DBM::PdBridge::sendBang(QString receiver){
+   Audio::puredata.sendBang(receiver.toStdString());
+}
+
 
 /*
 
@@ -98,22 +118,6 @@ void DBM::PdBridge::configurePlayback(int sampleRate, int numberChannels, bool i
   
 }
 
-- (void)openFile:(CDVInvokedUrlCommand*)command {
-  NSString* dir = [command.arguments objectAtIndex:0];
-  __block NSString* fileName = [command.arguments objectAtIndex:1];
-  __block NSString* path = [[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:dir];
-  [self.commandDelegate runInBackground:^{
-    CDVPluginResult* pluginResult = nil;
-    if([PdBase openFile:fileName path:path]==nil){
-      NSString* msg = [NSString stringWithFormat:@"Could not open PD patch %@/%@", path, fileName];
-      pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:msg];
-    }
-    else{
-      pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-    }
-    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-  }];
-}
 
 - (void)setActive:(CDVInvokedUrlCommand*)command {
   BOOL active = [[command.arguments objectAtIndex:0] boolValue];

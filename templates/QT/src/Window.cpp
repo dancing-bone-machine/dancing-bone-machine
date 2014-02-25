@@ -40,6 +40,7 @@ bridge(brdg)
 
    webView = new QWebView(window);
    WebPage* page = new WebPage(webView);
+   page->settings()->setAttribute(QWebSettings::LocalStorageEnabled, true);
    webView->setPage(page);
    connectToJS();
    connect( webView->page()->mainFrame(), SIGNAL(javaScriptWindowObjectCleared()), this, SLOT(connectToJS()) );

@@ -2077,17 +2077,20 @@ var requirejs, require, define;
    var runningInCordova = navigator.userAgent.indexOf('DancingBoneMachineCordova') != -1
    var runningInQT = navigator.userAgent.indexOf('DancingBoneMachineQT') != -1
 
+   // DEBUG: 
+   // runningInQT = true;
+
    var scripts = [];
    if(runningInQT){
       scripts.push('scripts/dancing-bone-machine/puredata.qt');
    }
    else if(runningInCordova){
-      scripts.push('scripts/dancing-bone-machine/cordova/cordova');
       scripts.push('scripts/dancing-bone-machine/puredata');
+      scripts.push('scripts/dancing-bone-machine/cordova/cordova');
    }
    else{ //runnning in a browser in debug mode
-      scripts.push('scripts/dancing-bone-machine/cordova.shims');
       scripts.push('scripts/dancing-bone-machine/puredata.debug');
+      scripts.push('scripts/dancing-bone-machine/cordova.shims');
    }
 
    require(scripts, function(script1, script2){

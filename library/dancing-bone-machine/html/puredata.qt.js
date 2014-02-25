@@ -39,12 +39,26 @@ define(function() {
        */
       _callbacks: [],
 
+      _queueCallbacks: function(success, error){
+         var l = PD._callbacks.length;
+         PD._callbacks[l] = success;
+         PD._callbacks[l+1] = error;
+         return l;
+      },
+
       _fireCallback: function(callbackId, params){
-         // console.log("JS CALLNG CALLBACK " + callbackId);
-         // console.log("With params " + params);
-         console.log(PD._callbacks[callbackId]);
-         
-         PD._callbacks[callbackId].call(this, params);
+         if(typeof(PD._callbacks[callbackId])=='function'){
+            PD._callbacks[callbackId].call(this, params);
+         }
+
+         // success callbacks are even, error callbacks are odd, remove both
+         PD._callbacks.splice(callbackId);
+         if(callbackId%2 == 0){
+            PD._callbacks.splice(callbackId+1);
+         }
+         else{
+            PD._callbacks.splice(callbackId-1);
+         }
       },
       
       /**
@@ -56,7 +70,7 @@ define(function() {
       _unimplemented: function(success){
          var caller = arguments.callee.caller.name;
          console.log("The function "+ caller + " has not been implemented yet. Help us out and report your need, or implement it yoursef :)");
-         if(typeof success != 'undefined') success();
+         if(typeof success == 'function') success();
       },
 
 
@@ -76,7 +90,8 @@ define(function() {
        * Opens a PD patch. 
        */
       openFile: function(dir, file, success, error){
-         // cordova.exec(success, error, "PureData", "openFile", [dir, file]);
+         var cbid = PD._queueCallbacks(success, error);
+         QT.openFile(dir, file, cbid);
       },
 
       // _file: null,
@@ -147,7 +162,7 @@ define(function() {
        * @method sendBang
        */
       sendBang: function(receiver){
-         // cordova.exec(null, null, "PureData", "sendBang", [receiver]);
+         QT.sendBang(receiver);
       },
 
       /**
@@ -410,11 +425,8 @@ define(function() {
        * @method configurePlayback
        */
       configurePlayback: function(sampleRate, numberChannels, inputEnabled, mixingEnabled, success, error){
-         PD._callbacks[1] = success;
-         console.log('configure playback in JS');
-         QT.configurePlayback(sampleRate, numberChannels, inputEnabled, mixingEnabled, '1', '2');
-
-         // cordova.exec(success, error, "PureData", "configurePlayback", [sampleRate, numberChannels, inputEnabled, mixingEnabled]);
+         var cbid = PD._queueCallbacks(success, error);
+         QT.configurePlayback(sampleRate, numberChannels, inputEnabled, mixingEnabled, cbid);
       },
 
       // /**
@@ -436,10 +448,10 @@ define(function() {
       // },
 
       /**
-       * Start/Stop sound I/O.
+       * DSP on/off to PD.
        */
-      setActive: function(active, success, error){
-         // cordova.exec(success, error, "PureData", "setActive", [active]);
+      setActive: function(active){
+         QT.setActive(active);
       },
 
       // /**
@@ -458,6 +470,9 @@ define(function() {
           // cordova.exec(success, error, "PureData", "showMediaPicker", []);
        }
    };
-   QT.fireCallback.connect(PD, "_fireCallback");
+
+   QT.fireErrorCallback.connect(PD, "_fireCallback");
+   QT.fireOKCallback.connect(PD, "_fireCallback");
+
    return PD;
 });
