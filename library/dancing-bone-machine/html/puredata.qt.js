@@ -169,7 +169,7 @@ define(function() {
        * Send a message to the PD patch
        */
       sendFloat: function(num, receiver){
-         // cordova.exec(null, null, "PureData", "sendFloat", [num, receiver]);
+         QT.sendFloat(num, receiver);
       },
 
      /**
@@ -283,8 +283,8 @@ define(function() {
        *
        * @method sendNoteOn
        */
-      sendNoteOn: function(channel, pitch, velocity, success, error){
-         // cordova.exec(success, error, "PureData", "sendNoteOn", [channel, pitch, velocity]);
+      sendNoteOn: function(channel, pitch, velocity){
+         QT.sendNoteOn(channel, pitch, velocity);
       },
 
       // sendControlChange: function(channel, controller, value){ 

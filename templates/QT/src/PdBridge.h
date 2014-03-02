@@ -29,5 +29,7 @@ namespace DBM{
          void openFile(QString path, QString fileName, int callbackId);
          void setActive(bool active);
          void sendBang(QString receiver);
+         void sendNoteOn(int channel, int pitch, int velocity);
+         void sendFloat(float num, QString receiver);
    };
 };

@@ -54,8 +54,16 @@ void DBM::PdBridge::setActive(bool active){
    Audio::puredata.computeAudio(active);
 }
 
+void DBM::PdBridge::sendFloat(float num, QString receiver){
+   Audio::puredata.sendFloat(receiver.toStdString(), num);
+}
+
 void DBM::PdBridge::sendBang(QString receiver){
    Audio::puredata.sendBang(receiver.toStdString());
+}
+
+void DBM::PdBridge::sendNoteOn(int channel, int pitch, int velocity){
+   Audio::puredata.sendNoteOn(channel, pitch, velocity);
 }
 
 

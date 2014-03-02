@@ -42,6 +42,10 @@ bridge(brdg)
    WebPage* page = new WebPage(webView);
    page->settings()->setAttribute(QWebSettings::LocalStorageEnabled, true);
    webView->setPage(page);
+
+   webView->page()->mainFrame()->setScrollBarPolicy( Qt::Vertical, Qt::ScrollBarAlwaysOff );
+   webView->page()->mainFrame()->setScrollBarPolicy( Qt::Horizontal, Qt::ScrollBarAlwaysOff );
+
    connectToJS();
    connect( webView->page()->mainFrame(), SIGNAL(javaScriptWindowObjectCleared()), this, SLOT(connectToJS()) );
    webView->resize(width, height);

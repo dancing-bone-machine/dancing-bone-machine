@@ -17,14 +17,27 @@ OBJECTS_DIR += obj
 RCC_DIR += obj
 MOC_DIR += obj
 
-# Copy resources to binary bundle
+
 macx{
 	RESOURCES_DIR = $$DESTDIR/DancingBoneMachine.app/Contents/MacOS
+}
+
+# Copy pd objects to binary bundle
+macx{
+	copy_pd.target = $$RESOURCES_DIR/res/pd/dbm
+	copy_pd.commands = cp -RL ../../library/dancing-bone-machine/pd/externals/bin $$RESOURCES_DIR/res/pd/dbm
+}
+QMAKE_EXTRA_TARGETS += copy_pd
+POST_TARGETDEPS += $$RESOURCES_DIR/res/pd/dbm
+
+# Copy resources to binary bundle
+macx{
 	copy_resources.target = $$RESOURCES_DIR/res
 	copy_resources.commands = cp -RL res $$RESOURCES_DIR
 }
 QMAKE_EXTRA_TARGETS += copy_resources
 POST_TARGETDEPS += $$RESOURCES_DIR/res
+
 
 # Run
 run.target = run
