@@ -13,7 +13,7 @@ int main(int argv, char **args) {
    DBM::PdBridge* bridge = new DBM::PdBridge(&app);
 
    QString path = "file://" + QApplication::applicationDirPath() + "/res/html/index.html";
-   new DBM::Window(450, 600, path, bridge, &app);
+   new DBM::Window(940, 700, path, bridge, &app);
    
    return app.exec();
 }

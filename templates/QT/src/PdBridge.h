@@ -6,13 +6,16 @@
 #include "Audio.h"
 
 namespace DBM{
-   class PdBridge: public QObject{
+   class PdBridge: public QObject, public pd::PdReceiver{
       Q_OBJECT
 
       public:
          explicit PdBridge(QObject* parent = 0);
          virtual ~PdBridge();
          void setPage(WebPage* page);
+
+         // PdReceiver methods:
+         void print(const std::string& message);
 
       protected:
          WebPage* page;

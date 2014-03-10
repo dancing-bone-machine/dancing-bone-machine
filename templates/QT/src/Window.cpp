@@ -21,6 +21,9 @@
 #include <iostream>
 #include <QWebFrame>
 #include <QApplication>
+#include <QMouseEvent>
+#include <QNetworkRequest>
+#include <QNetworkReply>
 #include "Window.h"
 #include "WebPage.h"
 
@@ -38,10 +41,18 @@ bridge(brdg)
    window->setMaximumSize(width, height);
    window->setMinimumSize(width, height);
 
+   
    webView = new QWebView(window);
+   webView->setAttribute(Qt::WA_AcceptTouchEvents, false);
+   webView->setContextMenuPolicy(Qt::NoContextMenu);
+
    WebPage* page = new WebPage(webView);
    page->settings()->setAttribute(QWebSettings::LocalStorageEnabled, true);
    webView->setPage(page);
+
+   webView->page()->setForwardUnsupportedContent(true);
+   connect(webView->page(),SIGNAL(downloadRequested(QNetworkRequest)),this,SLOT(download(QNetworkRequest)));
+   connect(webView->page(),SIGNAL(unsupportedContent(QNetworkReply*)),this,SLOT(unsupportedContent(QNetworkReply*)));
 
    webView->page()->mainFrame()->setScrollBarPolicy( Qt::Vertical, Qt::ScrollBarAlwaysOff );
    webView->page()->mainFrame()->setScrollBarPolicy( Qt::Horizontal, Qt::ScrollBarAlwaysOff );
@@ -66,4 +77,12 @@ DBM::Window::~Window(){
 void DBM::Window::connectToJS(){
    webView->page()->mainFrame()->addToJavaScriptWindowObject(QString("QT"), bridge);
    webView->page()->mainFrame()->addToJavaScriptWindowObject(QString("console"), console);
+} 
+
+void DBM::Window::download(const QNetworkRequest &request){
+   std::cout << "Download: " << std::endl;
+}
+
+void DBM::Window::unsupportedContent(QNetworkReply * reply){
+   std::cout << "Unsupported Content: " << std::endl;
 }

@@ -7,6 +7,7 @@
 
 DBM::PdBridge::PdBridge(QObject* parent) : QObject(parent){
    audio = new Audio();
+   Audio::puredata.setReceiver(this);
 }
 
 DBM::PdBridge::~PdBridge(){
@@ -15,6 +16,13 @@ DBM::PdBridge::~PdBridge(){
 
 void DBM::PdBridge::setPage(WebPage* page){
    this->page = page;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// The following methods receive messages from PureData:
+
+void DBM::PdBridge::print(const std::string& message){
+   std::cout << "PD: " << message << std::endl;
 }
    
 ////////////////////////////////////////////////////////////////////////////////

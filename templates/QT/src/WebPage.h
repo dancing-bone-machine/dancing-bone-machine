@@ -1,6 +1,8 @@
 #pragma once
 
 #include <QWebPage>
+#include <QWebView>
+#include <QMouseEvent>
 
 namespace DBM{
    // Subclass QWebPage so we can change the user agent string
@@ -12,3 +14,4 @@ namespace DBM{
          QString userAgentForUrl(const QUrl &url ) const;
    };
 };
+
