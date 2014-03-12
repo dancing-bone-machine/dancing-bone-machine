@@ -1,5 +1,5 @@
 #include "Audio.h"
-
+#include "Externals.h"
 
 int audioCallback(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames, double streamTime, RtAudioStreamStatus status, void *data){
    float* out = (float*)outputBuffer;
@@ -62,6 +62,7 @@ int DBM::Audio::start(){
    }
 
    puredata.init(2,2,sampleRate);
+   Externals::init();
 
    // int i = rtaudio.getDefaultOutputDevice();
    // RtAudio::DeviceInfo info = rtaudio.getDeviceInfo(i);

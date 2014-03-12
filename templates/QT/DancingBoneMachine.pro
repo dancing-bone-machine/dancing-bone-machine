@@ -9,7 +9,6 @@ QMAKE_CXXFLAGS += -O3
 # Input
 HEADERS += src/*.h
 SOURCES += src/*.cpp
-# SOURCES += HoaLibrary/PureData/hoaMap/hoa.map~.cpp
 
 # Output
 DESTDIR = bin
@@ -17,7 +16,6 @@ TARGET = DancingBoneMachine
 OBJECTS_DIR += obj
 RCC_DIR += obj
 MOC_DIR += obj
-
 
 # Copy resources
 macx{
@@ -32,7 +30,7 @@ res.target = $$RESOURCES_DIR/res
 res.CONFIG = phony
 QMAKE_EXTRA_TARGETS += res
 POST_TARGETDEPS += $$RESOURCES_DIR/res
-QMAKE_CLEAN += -r $$RESOURCES_DIR/res
+# QMAKE_CLEAN += -r $$RESOURCES_DIR/res
 
 # Run
 run.target = run
@@ -41,6 +39,36 @@ macx{
 }
 run.depends = $(TARGET)
 QMAKE_EXTRA_TARGETS += run
+
+# ogg library
+macx{
+	ogg_dir = "/usr/local/Cellar/libogg/1.3.1/"
+	ogg_lib = $$ogg_dir"lib/libogg.a"
+   ogg.commands = brew install libogg
+}
+ogg.target = $$ogg_lib
+QMAKE_EXTRA_TARGETS += ogg
+PRE_TARGETDEPS += $$ogg_lib
+INCLUDEPATH += $$ogg_dir"include"
+LIBS += $$ogg_lib
+
+# vorbis library
+macx{
+	vorbis_dir = "/usr/local/Cellar/libvorbis/1.3.4/"
+	vorbis_lib = $$vorbis_dir"lib/libvorbis.a"
+   vorbis.commands = brew install libvorbis
+}
+vorbis.depends = ogg
+vorbis.target = $$vorbis_lib
+QMAKE_EXTRA_TARGETS += vorbis
+PRE_TARGETDEPS += $$vorbis_lib
+INCLUDEPATH += $$vorbis_dir"include"
+LIBS += $$vorbis_lib $$vorbis_dir"lib/libvorbisenc.a" $$vorbis_dir"lib/libvorbisfile.a"
+
+# oggread~ external.
+INCLUDEPATH += app/vendors/pd-extended/src
+INCLUDEPATH += app/vendors/pdogg
+SOURCES += app/vendors/pdogg/oggread~.c
 
 # RTAudio Library
 rtaudio_dir = "vendors/rtaudio"
