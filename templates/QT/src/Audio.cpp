@@ -1,17 +1,27 @@
 #include "Audio.h"
 #include "Externals.h"
 
+// define the static property puredata of type PdBase
+pd::PdBase DBM::Audio::puredata;
+
+// define the static property mutex of type QMutex
+QMutex DBM::Audio::mutex;
+
 int audioCallback(void *outputBuffer, void *inputBuffer, unsigned int nBufferFrames, double streamTime, RtAudioStreamStatus status, void *data){
+
+   if (status!=0) {
+      std::cout << "Stream over/underflow detected." << std::endl;
+   }
+
    float* out = (float*)outputBuffer;
    float* in = (float*)inputBuffer;
 
-   // Process 1 tick, assuming block size of 64.
-   // std::cout << "p" << std::endl;
-   DBM::Audio::puredata.processFloat(1, in, out);
-   // std::cout << "d" << std::endl;
+   // Process 8 ticks, assuming block size of 512. Puredata processes in ticks of 64 samples
+   DBM::Audio::mutex.lock();
+   DBM::Audio::puredata.processFloat(8, in, out);
+   DBM::Audio::mutex.unlock();
    
    // Echo
-   // if ( status ) std::cout << "Stream over/underflow detected." << std::endl;
    // memcpy( outputBuffer, inputBuffer, nBufferFrames*4*2);
 
    // Noise
@@ -22,14 +32,13 @@ int audioCallback(void *outputBuffer, void *inputBuffer, unsigned int nBufferFra
    //       out++;
    //    }
    // }
-   // (void)inputBuffer;
-   // (void)outputBuffer;
+
+   return 0;
+
    (void)nBufferFrames;
    (void)streamTime;
    (void)status;
    (void)data;
-
-   return 0;
 }
 
 
@@ -39,8 +48,6 @@ DBM::Audio::~Audio(){
    this->stop();
 }
 
-// define th static property puredata of type PdBase
-pd::PdBase DBM::Audio::puredata;
 
 unsigned int DBM::Audio::getSampleRate(){
    return this->sampleRate;
@@ -61,8 +68,10 @@ int DBM::Audio::start(){
       }
    }
 
+   Audio::mutex.lock();
    puredata.init(2,2,sampleRate);
    Externals::init();
+   Audio::mutex.unlock();
 
    // int i = rtaudio.getDefaultOutputDevice();
    // RtAudio::DeviceInfo info = rtaudio.getDeviceInfo(i);
@@ -73,7 +82,7 @@ int DBM::Audio::start(){
    // std::cout << info.name << std::endl;
 
    // Initialize audio
-   blockSize = 64;
+   blockSize = 512;
    RtAudio::StreamParameters inputParams, outputParams;
    outputParams.deviceId = rtaudio.getDefaultOutputDevice();
    outputParams.nChannels = 2;

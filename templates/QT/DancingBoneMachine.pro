@@ -42,9 +42,9 @@ QMAKE_EXTRA_TARGETS += run
 
 # ogg library
 macx{
-	ogg_dir = "/usr/local/Cellar/libogg/1.3.1/"
-	ogg_lib = $$ogg_dir"lib/libogg.a"
-   ogg.commands = brew install libogg
+	ogg_dir = "app/vendors/libogg/"
+	ogg_lib = $$ogg_dir"src/.libs/libogg.a"
+   # ogg.commands = brew install libogg
 }
 ogg.target = $$ogg_lib
 QMAKE_EXTRA_TARGETS += ogg
@@ -54,8 +54,8 @@ LIBS += $$ogg_lib
 
 # vorbis library
 macx{
-	vorbis_dir = "/usr/local/Cellar/libvorbis/1.3.4/"
-	vorbis_lib = $$vorbis_dir"lib/libvorbis.a"
+	vorbis_dir = "app/vendors/libvorbis/"
+	vorbis_lib = $$vorbis_dir"lib/.libs/libvorbis.a"
    vorbis.commands = brew install libvorbis
 }
 vorbis.depends = ogg
@@ -63,7 +63,7 @@ vorbis.target = $$vorbis_lib
 QMAKE_EXTRA_TARGETS += vorbis
 PRE_TARGETDEPS += $$vorbis_lib
 INCLUDEPATH += $$vorbis_dir"include"
-LIBS += $$vorbis_lib $$vorbis_dir"lib/libvorbisenc.a" $$vorbis_dir"lib/libvorbisfile.a"
+LIBS += $$vorbis_lib $$vorbis_dir"lib/.libs/libvorbisenc.a" $$vorbis_dir"lib/.libs/libvorbisfile.a"
 
 # oggread~ external.
 INCLUDEPATH += app/vendors/pd-extended/src

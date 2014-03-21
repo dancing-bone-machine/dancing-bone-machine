@@ -1,13 +1,17 @@
 #include <iostream>
-#include <QWebFrame>,
+#include <QWebFrame>
 #include <QMap>
 #include <QApplication>
+#include <PdTypes.hpp>
+
 #include "PdBridge.h"
 
 
 DBM::PdBridge::PdBridge(QObject* parent) : QObject(parent){
    audio = new Audio();
+   Audio::mutex.lock();
    Audio::puredata.setReceiver(this);
+   Audio::mutex.unlock();
 }
 
 DBM::PdBridge::~PdBridge(){
@@ -19,15 +23,8 @@ void DBM::PdBridge::setPage(WebPage* page){
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// The following methods receive messages from PureData:
-
-void DBM::PdBridge::print(const std::string& message){
-   std::cout << "PD: " << message << std::endl;
-}
-   
-////////////////////////////////////////////////////////////////////////////////
 // The following methods can be called from Javascript as members of a global
-// PD object. PD.configurePlayback(...) for example.
+// object called QT. Ex: QT.configurePlayback(...).
 
 
 void DBM::PdBridge::configurePlayback(int sampleRate, int numberChannels, bool inputEnabled, bool mixingEnabled, int callbackId){
@@ -44,12 +41,16 @@ void DBM::PdBridge::configurePlayback(int sampleRate, int numberChannels, bool i
    params["mixingEnabled"] = QVariant(mixingEnabled);
 
    emit fireOKCallback(callbackId, params);
+
+   (void)sampleRate;
 }
 
 
 void DBM::PdBridge::openFile(QString path, QString fileName, int callbackId){
    path = QApplication::applicationDirPath() + "/res/" + path;
+   Audio::mutex.lock();
    pd::Patch patch = Audio::puredata.openPatch(fileName.toStdString(), path.toStdString());
+   Audio::mutex.unlock();
    if(!patch.isValid()) {
       fireErrorCallback(callbackId+1, "Could not open patch");
       return;
@@ -59,19 +60,84 @@ void DBM::PdBridge::openFile(QString path, QString fileName, int callbackId){
 }
 
 void DBM::PdBridge::setActive(bool active){
+   Audio::mutex.lock();
    Audio::puredata.computeAudio(active);
+   Audio::mutex.unlock();
+}
+
+void DBM::PdBridge::sendList(QVariantList list, QString receiver){
+   Audio::mutex.lock();
+   Audio::puredata.startMessage();
+
+   for(int i=0; i<list.size(); i++){
+      bool ok = false;   
+      float val = list.at(i).toFloat(&ok);
+      if(ok){
+         Audio::puredata.addFloat(val);
+      }
+      else{
+         QString str = list.at(i).toString();
+         Audio::puredata.addSymbol(str.toStdString());
+      }
+   }
+
+   Audio::puredata.finishList(receiver.toStdString());
+   Audio::mutex.unlock();
 }
 
 void DBM::PdBridge::sendFloat(float num, QString receiver){
+   Audio::mutex.lock();
    Audio::puredata.sendFloat(receiver.toStdString(), num);
+   Audio::mutex.unlock();
 }
 
 void DBM::PdBridge::sendBang(QString receiver){
+   Audio::mutex.lock();
    Audio::puredata.sendBang(receiver.toStdString());
+   Audio::mutex.unlock();
 }
 
 void DBM::PdBridge::sendNoteOn(int channel, int pitch, int velocity){
+   Audio::mutex.lock();
    Audio::puredata.sendNoteOn(channel, pitch, velocity);
+   Audio::mutex.unlock();
+}
+
+void DBM::PdBridge::bind(QString sender){
+   Audio::puredata.subscribe(sender.toStdString());
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// The following methods are called by libpd when messages are sent from the 
+// patch
+
+void DBM::PdBridge::print(const std::string& message){
+   std::cout << "PD: " << message << std::endl;
+}
+   
+void DBM::PdBridge::receiveBang(const std::string& dest){
+   emit doReceiveBang(QString::fromStdString(dest));
+}
+
+void DBM::PdBridge::receiveFloat(const std::string& dest, float num){
+   emit doReceiveFloat(QString::fromStdString(dest), num);
+}
+
+void DBM::PdBridge::receiveSymbol(const std::string& dest, const std::string& symbol){
+   emit doReceiveSymbol(QString::fromStdString(dest), QString::fromStdString(symbol));
+}
+
+void DBM::PdBridge::receiveList(const std::string& dest, const pd::List& list){
+   std::cout <<  "DBM::PdBridge::receiveList is unimplemented." << std::endl;
+   (void)dest;
+   (void)list;
+}
+
+void DBM::PdBridge::receiveMessage(const std::string& dest, const std::string& msg, const pd::List& list){
+   std::cout << "DBM::PdBridge::receiveMessage is unimplemented." << std::endl;
+   (void)dest;
+   (void)list;
+   (void)msg;
 }
 
 

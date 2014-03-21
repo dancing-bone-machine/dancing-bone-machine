@@ -29,7 +29,5 @@ namespace DBM{
 
       public slots:
          void connectToJS();
-         void download(const QNetworkRequest &request);
-         void unsupportedContent(QNetworkReply * reply);
    };
 };

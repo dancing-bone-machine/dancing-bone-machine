@@ -181,16 +181,14 @@ define(function() {
        // cordova.exec(null, null, "PureData", "sendSymbol", [value, receiver]);
      },
 
-      // /**
-      //  * Send a list message to the PD patch
-      //  *
-      //  * @mehod sendList
-      //  */
-      // sendList: function(list, receiver){
-      //    var msg = list.join(' ');
-      //    msg = ['ds-send-list', receiver, msg].join(' ');
-      //    this._websocket.send(msg);
-      // },
+      /**
+       * Send a list message to the PD patch
+       *
+       * @mehod sendList
+       */
+      sendList: function(list, receiver){
+         QT.sendList(list, receiver);
+      },
 
       // /**
       //  * Send a typed message to the PD patch.
@@ -217,17 +215,16 @@ define(function() {
       */
      bind: function(sender, callback){
        PD._bindCallbacks[sender] = callback;
-       // cordova.exec(null, null, "PureData", "bind", [sender]);
+       QT.bind(sender);
      },
 
      _bindCallbacks: {},
 
-     _didReceiveSend: function(msg){
-       var i = msg.indexOf(' ');
-       var sendName = msg.substring(0,i);
-       msg = msg.substr(i+1);
-        var callback = PD._bindCallbacks[sendName];
-        if(typeof callback == 'function') callback(msg);
+     _didReceiveSend: function(sender, msg){
+       var callback = PD._bindCallbacks[sender];
+       if(typeof(callback)=='function'){
+         callback.call(this, msg);
+       }
      },
 
       // /**
@@ -473,6 +470,12 @@ define(function() {
 
    QT.fireErrorCallback.connect(PD, "_fireCallback");
    QT.fireOKCallback.connect(PD, "_fireCallback");
+
+   QT.doReceiveBang.connect(PD, "_didReceiveSend");
+   QT.doReceiveFloat.connect(PD, "_didReceiveSend");
+   QT.doReceiveSymbol.connect(PD, "_didReceiveSend");
+   // QT.doReceiveList.connect(PD, "_didReceiveSend");
+   // QT.doReceiveMessage.connect(PD, "_didReceiveSend");
 
    return PD;
 });

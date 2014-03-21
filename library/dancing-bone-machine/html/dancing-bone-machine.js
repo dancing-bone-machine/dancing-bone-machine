@@ -2078,7 +2078,7 @@ var requirejs, require, define;
    var runningInQT = navigator.userAgent.indexOf('DancingBoneMachineQT') != -1
 
    // DEBUG: 
-   // runningInQT = true;
+   runningInQT = true;
 
    var scripts = [];
    if(runningInQT){

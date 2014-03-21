@@ -50,10 +50,6 @@ bridge(brdg)
    page->settings()->setAttribute(QWebSettings::LocalStorageEnabled, true);
    webView->setPage(page);
 
-   webView->page()->setForwardUnsupportedContent(true);
-   connect(webView->page(),SIGNAL(downloadRequested(QNetworkRequest)),this,SLOT(download(QNetworkRequest)));
-   connect(webView->page(),SIGNAL(unsupportedContent(QNetworkReply*)),this,SLOT(unsupportedContent(QNetworkReply*)));
-
    webView->page()->mainFrame()->setScrollBarPolicy( Qt::Vertical, Qt::ScrollBarAlwaysOff );
    webView->page()->mainFrame()->setScrollBarPolicy( Qt::Horizontal, Qt::ScrollBarAlwaysOff );
 
@@ -65,6 +61,7 @@ bridge(brdg)
    bridge->setPage(page);
 
    window->show();
+
 };
 
 DBM::Window::~Window(){
@@ -78,11 +75,3 @@ void DBM::Window::connectToJS(){
    webView->page()->mainFrame()->addToJavaScriptWindowObject(QString("QT"), bridge);
    webView->page()->mainFrame()->addToJavaScriptWindowObject(QString("console"), console);
 } 
-
-void DBM::Window::download(const QNetworkRequest &request){
-   std::cout << "Download: " << std::endl;
-}
-
-void DBM::Window::unsupportedContent(QNetworkReply * reply){
-   std::cout << "Unsupported Content: " << std::endl;
-}
