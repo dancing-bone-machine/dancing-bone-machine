@@ -20,7 +20,7 @@
 define(function() {
    /**
     * This class allows javascript code running within a QWebview (Part of 
-    * the QT framework to communicate with a running instance of libpd 
+    * the QT framework) to communicate with a running instance of libpd 
     * using QT's QWebView bridge mechanism. 
     *
     * The API is 100% compatible with other bridge implementations in the 
@@ -31,10 +31,27 @@ define(function() {
     * @static
     */
    var PD = {
+      //////////////////////////////////////////////////////////////////////////
+      // Some utilities
+
+      /**
+       * Called by methods that have not been implemented yet
+       *
+       * @method _unimplemented
+       * @private
+       */
+      _unimplemented: function(success){
+         var caller = arguments.callee.caller.name;
+         console.log("The function "+ caller + " has not been implemented yet. Help us out and report your need, or implement it yoursef :)");
+         if(typeof success == 'function') success();
+      },
+
+      //////////////////////////////////////////////////////////////////////////
+      // Callback mechanism so that C++ can call the correct callbacks in JS.
+
       /**
        * Holds the javascript callbacks for later calling when C++ returns
        *
-       * @method _unimplemented
        * @private
        */
       _callbacks: [],
@@ -61,100 +78,50 @@ define(function() {
          }
       },
       
-      /**
-       * Called by methods that have not been implemented yet
-       *
-       * @method _unimplemented
-       * @private
-       */
-      _unimplemented: function(success){
-         var caller = arguments.callee.caller.name;
-         console.log("The function "+ caller + " has not been implemented yet. Help us out and report your need, or implement it yoursef :)");
-         if(typeof success == 'function') success();
-      },
+      //////////////////////////////////////////////////////////////////////////
+      // Open and close puredata files
 
-
-      // initialize: function(success, error){
-      //    this._doNothing(success);
-      // },
-
-      // clearSearchPath: function(success, error){
-      //    this._doNothing(success);
-      // },
-
-      // addToSearchPath: function(path, success, error){
-      //    this._doNothing(success);
-      // },
 
       /**
        * Opens a PD patch. 
+       *
+       * @method openFile
        */
       openFile: function(dir, file, success, error){
          var cbid = PD._queueCallbacks(success, error);
          QT.openFile(dir, file, cbid);
       },
 
-      // _file: null,
+      /**
+       * Closes a PD patch.
+       *
+       * @method closeFile
+       */
+      closeFile: function(file, success, error){
+         this._unimplemented(success);
+      },
 
-      // _openFileSuccessCallback: null,
-      // 
-      // _connectionTimer: null,
+      /**
+       * Returns the instance number ($0) for a patch.
+       *
+       * @method dollarZeroForFile
+       */
+      dollarZeroForFile: function(file, success, error){
+         this._unimplemented(success);
+      },
 
-      // _connect: function(){
-      //    window.WebSocket = window.WebSocket || window.MozWebSocket;
-      //    this._websocket = new WebSocket('ws://127.0.0.1:9000', 'pd-websocket'); 
 
-      //    this._websocket.onopen = function () {
-      //       console.log('Established connection with ' + PD._file);
-      //       if(typeof PD._openFileSuccessCallback != 'undefined') PD._openFileSuccessCallback();
-      //    };
+      //////////////////////////////////////////////////////////////////////////
+      // Send messages to PD 
 
-      //    this._websocket.onerror = function () {
-      //       setTimeout(PD._connect, 5000);
-      //       console.log('Could not establish connection with ' + PD._file + '. Make sure it\'s open in pd-extended. Retrying in 5 secs...');
-      //    };
-
-      //    this._websocket.onmessage = this._didReceiveMessage;
-      // },
-
-      // /**
-      //  * Fires when a websockets message was received.
-      //  *
-      //  * @private
-      //  */
-      // _didReceiveMessage: function(message) {
-      //    message=message.data;
-      //    var i = message.indexOf(' ');
-      //    var cmd = message.substring(0, i);
-      //    switch (cmd) {
-      //       case 'ds-send':
-      //          PD._didReceiveSend(message.substr(i+1));
-      //          break;
-      //       case 'ds-read-array':
-      //          PD._didReadArray(message.substr(i+1));
-      //          break;
-      //       case 'ds-bendout':
-      //       case 'ds-ctlout':
-      //       case 'ds-midiout':
-      //       case 'ds-noteout':
-      //       case 'ds-pgmout':
-      //       case 'ds-polytouchout':
-      //       case 'ds-touchout':
-      //          PD._didReceiveMidi(cmd, message.substr(i+1));
-      //          break;
-
-      //       default:
-      //          // code
-      //    }
-      // },
-
-      // closeFile: function(file, success, error){
-      //    this._doNothing(success);
-      // },
-
-      // dollarZeroForFile: function(file, success, error){
-      //    this._unimplemented(); 
-      // },
+      /**
+       * DSP on/off to PD.
+       *
+       * @method setActive
+       */
+      setActive: function(active){
+         QT.setActive(active);
+      },
 
       /**
        * Send a bang message to the PD patch
@@ -167,6 +134,8 @@ define(function() {
 
       /**
        * Send a message to the PD patch
+       *
+       * @method sendFloat
        */
       sendFloat: function(num, receiver){
          QT.sendFloat(num, receiver);
@@ -175,7 +144,7 @@ define(function() {
      /**
       * Send a symbol message to the PD patch
       *
-      * @mehod sendFloat
+      * @mehod sendSymbol
       */
      sendSymbol: function(value, receiver){
        // cordova.exec(null, null, "PureData", "sendSymbol", [value, receiver]);
@@ -190,19 +159,19 @@ define(function() {
          QT.sendList(list, receiver);
       },
 
-      // /**
-      //  * Send a typed message to the PD patch.
-      //  * Ex: To send [pd; dsp 1(
-      //  *     You'd do  PD.sendMessage([1], 'pd', 'dsp'); 
-      //  *
-      //  * @mehod sendMessage
-      //  */
-      // sendMessage: function(list, receiver, symbol){
-      //    this._unimplemented();
-      //    // var msg = list.join(' ');
-      //    // msg = ['ds-send-message', receiver+';', symbol, msg].join(' ');
-      //    // this._websocket.send(msg);
-      // },
+      /**
+       * Send a typed message to the PD patch.
+       * Ex: To send [pd; dsp 1(
+       *     You'd do  PD.sendMessage([1], 'pd', 'dsp'); 
+       *
+       * @mehod sendMessage
+       */
+      sendMessage: function(list, receiver, symbol){
+         this._unimplemented();
+         // var msg = list.join(' ');
+         // msg = ['ds-send-message', receiver+';', symbol, msg].join(' ');
+         // this._websocket.send(msg);
+      },
 
 
      /**
@@ -227,28 +196,45 @@ define(function() {
        }
      },
 
-      // /**
-      //  * Unsubscribe from sends from pd patch.
-      //  *
-      //  * @mehod unbind
-      //  */
-      // unbind: function(sender){
-      //    this._bindCallbacks[sender] = null;
-      // },
+      /**
+       * Unsubscribe from sends from pd patch.
+       *
+       * @mehod unbind
+       */
+      unbind: function(sender){
+         this._unimplemented();
+      },
 
-      // /**
-      //  * Unsubscribe from all sends from pd patch.
-      //  *
-      //  * @mehod unbindAll
-      //  */
-      // unbindAll: function(){
-      //    var msg = 'ds-unbind-all bang';
-      //    this._websocket.send(msg);
-      // },
+      /**
+       * Unsubscribe from all sends from pd patch.
+       *
+       * @mehod unbindAll
+       */
+      unbindAll: function(){
+         this._unimplemented();
+      },
 
-      // arraySize: function(arrayName, success, error){
-      //    this._unimplemented();
-      // },
+      //////////////////////////////////////////////////////////////////////////
+      // Accessing PD arrays
+      //
+
+      /**
+       * Returns the size of a named array.
+       *
+       * @mehod arraySize
+       */
+      arraySize: function(arrayName, success, error){
+         this._unimplemented();
+      },
+
+      /**
+       * Writes to a PD array
+       *
+       * @mehod arraySize
+       */
+      writeArray: function(arrayName, data, success, error){
+         this._unimplemented();
+      },
 
       /**
        * Reads contents of an array or table object in the PD patch.
@@ -256,24 +242,11 @@ define(function() {
        * @mehod readArray
        */
       readArray: function(arrayName, n, offset, success, error){
-         // cordova.exec(success, error, "PureData", "readArray", [arrayName, n, offset]);
+         this._unimplemented();
       },
 
-      // _readArrayCallbacks: [],
-
-      // _didReadArray: function(data){
-      //    cbk = PD._readArrayCallbacks[0];
-      //    if(typeof cbk == 'function'){
-      //       // Split data into an array and get rid of first element (array name)
-      //       var points = data.split(' ');
-      //       points.shift();
-      //       cbk(points);
-      //    }
-      // },
-
-      // writeArray: function(arrayName, data, success, error){
-      //    this._unimplemented();
-      // },
+      //////////////////////////////////////////////////////////////////////////
+      // Send MIDI events to PD
 
       /**
        * Send a MIDI note on message to the PD patch
@@ -284,120 +257,76 @@ define(function() {
          QT.sendNoteOn(channel, pitch, velocity);
       },
 
-      // sendControlChange: function(channel, controller, value){ 
-      //    this._websocket.send('ds-ctlin ' + channel +' '+ controller +' '+ value);
-      // },
+      sendControlChange: function(channel, controller, value){ 
+         this._unimplemented();
+      },
 
-      // sendProgramChange: function(channel, program){ 
-      //    this._websocket.send('ds-pgmin ' + channel +' '+ program);
-      // },
+      sendProgramChange: function(channel, program){ 
+         this._unimplemented();
+      },
 
-      // sendPitchBend: function(channel, value){ 
-      //    this._websocket.send('ds-bendin ' + channel +' '+ value);
-      // },
+      sendPitchBend: function(channel, value){ 
+         this._unimplemented();
+      },
 
-      // sendAfterTouch: function(channel, value){ 
-      //    this._websocket.send('ds-touchin ' + channel +' '+ value);
-      // },
+      sendAfterTouch: function(channel, value){ 
+         this._unimplemented();
+      },
 
-      // sendPolyAfterTouch: function(channel, pitch, value){ 
-      //    this._websocket.send('ds-polytouchin ' + channel +' '+ pitch +' '+ value);
-      // },
+      sendPolyAfterTouch: function(channel, pitch, value){ 
+         this._unimplemented();
+      },
 
-      // sendMidiByte: function(port, value){ 
-      //    this._websocket.send('ds-midiin ' + port +' '+ value);
-      // },
+      sendMidiByte: function(port, value){ 
+         this._unimplemented();
+      },
 
-      // sendSysEx: function(port, value){ 
-      //    this._websocket.send('ds-sysexin ' + port +' '+ value);
-      // },
+      sendSysEx: function(port, value){ 
+         this._unimplemented();
+      },
 
-      // sendSysRealTime: function(port, value){ 
-      //    this._websocket.send('ds-midirealtimein ' + port +' '+ value);
-      // },
+      sendSysRealTime: function(port, value){ 
+         this._unimplemented();
+      },
 
-      // _didReceiveMidi: function(cmd, msg){
-      //    switch (cmd) {
-      //       case 'ds-bendout':
-      //          if(typeof PD._bindMidiPitchBendCallback == 'function'){
-      //             PD._bindMidiPitchBendCallback(msg);
-      //          }
-      //          break;
-      //       case 'ds-ctlout':
-      //          if(typeof PD._bindMidiControlChangeCallback == 'function'){
-      //             PD._bindMidiControlChangeCallback(msg);
-      //          }
-      //          break;
-      //       case 'ds-midiout':
-      //          if(typeof PD._bindMidiByteCallback== 'function'){
-      //             PD._bindMidiByteCallback(msg);
-      //          }
-      //          break;
-      //       case 'ds-noteout':
-      //          if(typeof PD._bindMidiNoteOnCallbackt == 'function'){
-      //             PD._bindMidiNoteOnCallback(msg);
-      //          }
-      //          break;
-      //       case 'ds-pgmout':
-      //          if(typeof PD._bindMidiProgramChangeCallback== 'function'){
-      //             PD._bindMidiProgramChangeCallback(msg);
-      //          }
-      //          break;
-      //       case 'ds-polytouchout':
-      //          if(typeof PD._bindMidiPolyAfterTouchCallback== 'function'){
-      //             PD._bindMidiPolyAfterTouchCallback(msg);
-      //          }
-      //          break;
-      //       case 'ds-touchout':
-      //          if(typeof PD._bindMidiAfterTouchCallback== 'function'){
-      //             PD._bindMidiAfterTouchCallback(msg);
-      //          }
-      //       break;
+      ///////////////////////////////////////////////////////////////////////// 
+      // Receive MIDI events from PD
 
-      //       default:
-      //          break;
-      //    }
-      // },
+      bindMidiNoteOn: function(callback){
+         this._unimplemented();
+      },
 
-      // bindMidiNoteOn: function(callback){
-      //    this._bindMidiNoteOnCallback=callback;
-      // },
-      // _bindMidiNoteOnCallback: null,
+      bindMidiControlChange: function(callback){
+         this._unimplemented();
+      },
 
-      // bindMidiControlChange: function(callback){
-      //    this._bindMidiControlChangeCallback=callback;
-      // },
-      // _bindMidiControlChangeCallback: null,
+      bindMidiProgramChange: function(callback){
+         this._unimplemented();
+      },
 
-      // bindMidiProgramChange: function(callback){
-      //    this._bindMidiProgramChangeCallback=callback;
-      // },
-      // _bindMidiProgramChangeCallback: null,
+      bindMidiPitchBend: function(callback){
+         this._unimplemented();
+      },
 
-      // bindMidiPitchBend: function(callback){
-      //    this._bindMidiPitchBendCallback=callback;
-      // },
-      // _bindMidiPitchBendCallback: null,
+      bindMidiAfterTouch: function(callback){
+         this._unimplemented();
+      },
 
-      // bindMidiAfterTouch: function(callback){
-      //    this._bindMidiAfterTouchCallback=callback;
-      // },
-      // _bindMidiAfterTouchCallback: null,
+      bindMidiPolyAfterTouch: function(callback){
+         this._unimplemented();
+      },
 
-      // bindMidiPolyAfterTouch: function(callback){
-      //    this._bindMidiPolyAfterTouchCallback=callback;
-      // },
-      // _bindMidiPolyAfterTouchCallback: null,
+      bindMidiByte: function(callback){
+         this._unimplemented();
+      },
 
-      // bindMidiByte: function(callback){
-      //    this._bindMidiByteCallback=callback;
-      // },
-      // _bindMidiByteCallback: null,
+      bindPrint: function(callback){
+         this._unimplemented();
+         // default implementation should console.log
+      },
 
-      // bindPrint: function(callback){
-      //    this._unimplemented();
-      //    // default implementation should console.log
-      // },
+      /////////////////////////////////////////////////////////////////////////
+      // Configure audio engine
 
       /**
        * Configures connection with audio hardware with given sample rate, 
@@ -415,62 +344,21 @@ define(function() {
        *         },
        *         function(error){
        *           console.log(error);
-       *           navigator.notification.alert('Sorry, I can\'t start audio playback :(', null, null, null);
        *         }
        *       );
        *  
        * @method configurePlayback
        */
       configurePlayback: function(sampleRate, numberChannels, inputEnabled, mixingEnabled, success, error){
+         console.log('eee');
          var cbid = PD._queueCallbacks(success, error);
          QT.configurePlayback(sampleRate, numberChannels, inputEnabled, mixingEnabled, cbid);
-      },
-
-      // /**
-      //  * Does nothing in debug mode.
-      //  *
-      //  * @method configureAmbient
-      //  */
-      // configureAmbient: function(sampleRate, numberChannels, mixingEnabled, success, error){
-      //    this._doNothing(success);
-      // },
-
-      // /**
-      //  * Does nothing in debug mode.
-      //  *
-      //  * @method configureTicksPerBuffer
-      //  */
-      // configureTicksPerBuffer: function(ticksPerBuffer, success, error){
-      //    this._doNothing(success);
-      // },
-
-      /**
-       * DSP on/off to PD.
-       */
-      setActive: function(active){
-         QT.setActive(active);
-      },
-
-      // /**
-      //  * Does nothing in debug mode
-      //  *
-      //  * @method setActive
-      //  */
-      // getActive: function(success, error){
-      //    this._doNothing(success);
-      // },
-       
-       /**
-        * Show media picker for the user to select an audio file and converts it to wav so that pd can open it.
-        */
-       showMediaPicker: function(success, error){
-          // cordova.exec(success, error, "PureData", "showMediaPicker", []);
-       }
+      }
    };
 
+   // Connect some QT signals to JS methods.
    QT.fireErrorCallback.connect(PD, "_fireCallback");
    QT.fireOKCallback.connect(PD, "_fireCallback");
-
    QT.doReceiveBang.connect(PD, "_didReceiveSend");
    QT.doReceiveFloat.connect(PD, "_didReceiveSend");
    QT.doReceiveSymbol.connect(PD, "_didReceiveSend");

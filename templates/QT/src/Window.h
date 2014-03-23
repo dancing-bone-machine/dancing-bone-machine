@@ -5,6 +5,7 @@
 #include <QWebView>
 #include "PdBridge.h"
 #include "Console.h"
+#include "File.h"
 
 namespace DBM{
    /**
@@ -26,6 +27,7 @@ namespace DBM{
          QWebView* webView;
          PdBridge* bridge;
          Console* console;
+         File* file;
 
       public slots:
          void connectToJS();

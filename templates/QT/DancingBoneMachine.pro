@@ -44,7 +44,7 @@ QMAKE_EXTRA_TARGETS += run
 macx{
 	ogg_dir = "app/vendors/libogg/"
 	ogg_lib = $$ogg_dir"src/.libs/libogg.a"
-   # ogg.commands = brew install libogg
+   ogg.commands = cd $$ogg_dir && ./configure && make
 }
 ogg.target = $$ogg_lib
 QMAKE_EXTRA_TARGETS += ogg
@@ -56,7 +56,7 @@ LIBS += $$ogg_lib
 macx{
 	vorbis_dir = "app/vendors/libvorbis/"
 	vorbis_lib = $$vorbis_dir"lib/.libs/libvorbis.a"
-   vorbis.commands = brew install libvorbis
+   vorbis.commands = cd $$vorbis_dir && ./configure && make 
 }
 vorbis.depends = ogg
 vorbis.target = $$vorbis_lib

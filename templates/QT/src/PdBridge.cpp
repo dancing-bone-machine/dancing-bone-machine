@@ -129,6 +129,9 @@ void DBM::PdBridge::receiveSymbol(const std::string& dest, const std::string& sy
 
 void DBM::PdBridge::receiveList(const std::string& dest, const pd::List& list){
    std::cout <<  "DBM::PdBridge::receiveList is unimplemented." << std::endl;
+   std::exception err;
+   throw err;
+
    (void)dest;
    (void)list;
 }

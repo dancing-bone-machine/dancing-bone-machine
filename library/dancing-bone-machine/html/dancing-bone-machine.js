@@ -2073,35 +2073,40 @@ var requirejs, require, define;
  */
 (function(global){
    // If running within one of the wrapper apps, the user 
-   // agent will have the 'DancingBoneMachine' string
+   // agent will have these strings:
    var runningInCordova = navigator.userAgent.indexOf('DancingBoneMachineCordova') != -1
    var runningInQT = navigator.userAgent.indexOf('DancingBoneMachineQT') != -1
 
    // DEBUG: 
-   runningInQT = true;
+   // runningInQT = true;
 
    var scripts = [];
    if(runningInQT){
       scripts.push('scripts/dancing-bone-machine/puredata.qt');
+      scripts.push('scripts/dancing-bone-machine/dbm.file.qt');
    }
    else if(runningInCordova){
-      scripts.push('scripts/dancing-bone-machine/puredata');
+      scripts.push('scripts/dancing-bone-machine/puredata.cordova');
+      scripts.push('scripts/dancing-bone-machine/dbm.file.cordova');
       scripts.push('scripts/dancing-bone-machine/cordova/cordova');
    }
-   else{ //runnning in a browser in debug mode
-      scripts.push('scripts/dancing-bone-machine/puredata.debug');
-      scripts.push('scripts/dancing-bone-machine/cordova.shims');
+   else{ //runnning in a web browser
+      scripts.push('scripts/dancing-bone-machine/puredata.browser');
+      scripts.push('scripts/dancing-bone-machine/dbm.file.browser');
+      scripts.push('scripts/dancing-bone-machine/shims');
    }
 
-   require(scripts, function(script1, script2){
+   require(scripts, function(script1, script2, script3){
       if(runningInCordova){
          document.addEventListener('deviceready', function(){
             global.PD = script1;
+            global.DBMFile = script2;
             main();
          }, false);
       }
       else{
          global.PD = script1;
+         global.DBMFile = script2;
          main();
       }
    });

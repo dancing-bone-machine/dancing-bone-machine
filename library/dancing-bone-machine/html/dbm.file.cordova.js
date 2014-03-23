@@ -17,23 +17,22 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+define(function() {
+   /**
+    * This class allows javascript code running within a QWebview (Part of 
+    * the QT framework) to read and write to a file system. The actual
+    * interfacing with the filesystem is done by the C++ DBM::File class.
+    *
+    * The API is 100% compatible with other DBM.File implementations in the 
+    * dancing-bone-machine toolkit so that application code can be used 
+    * within other runtime environments and platforms.
+    *
+    * @class DBMFile
+    * @static
+    */
+   var DBMFile = {
+      // Not yet implemented
+   };
 
-
-/**
- * When running your apps in debug mode, the Apache Cordova calls
- * can cause errors, or you might want to fake their return values. Here are
- * some useful shims that fake the cordova api.
- */
-
-if(typeof navigator === 'undefined'){
-  navigator={};
-}
-
-if(typeof navigator.notification === 'undefined'){
-  navigator.notification={};
-}
-
-navigator.notification.alert = function(message, callback, title, buttonName){
-  alert(message);
-  callback(); 
-};
+   return DBMFile;
+});

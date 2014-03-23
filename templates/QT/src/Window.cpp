@@ -36,6 +36,7 @@ htmlFilePath(htmlFilePath),
 bridge(brdg)
 {
    console = new Console(this);
+   file = new File(this);
 
    window = new QMainWindow();
    window->setMaximumSize(width, height);
@@ -73,5 +74,6 @@ DBM::Window::~Window(){
  */
 void DBM::Window::connectToJS(){
    webView->page()->mainFrame()->addToJavaScriptWindowObject(QString("QT"), bridge);
+   webView->page()->mainFrame()->addToJavaScriptWindowObject(QString("QTFile"), file);
    webView->page()->mainFrame()->addToJavaScriptWindowObject(QString("console"), console);
 } 
