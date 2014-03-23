@@ -30,7 +30,17 @@ res.target = $$RESOURCES_DIR/res
 res.CONFIG = phony
 QMAKE_EXTRA_TARGETS += res
 POST_TARGETDEPS += $$RESOURCES_DIR/res
-# QMAKE_CLEAN += -r $$RESOURCES_DIR/res
+QMAKE_CLEAN += -r $$RESOURCES_DIR/res
+QMAKE_CLEAN += -r $$DESTDIR/DancingBoneMachine.app
+
+# Deploy (create distributable binary)
+QT_BIN_DIR = ~/Qt/5.2.1/clang_64/bin
+deploy.target = deploy
+macx{
+	deploy.commands = $$QT_BIN_DIR/macdeployqt bin/DancingBoneMachine.app -dmg
+}
+deploy.depends = $(TARGET)
+QMAKE_EXTRA_TARGETS += deploy
 
 # Run
 run.target = run
