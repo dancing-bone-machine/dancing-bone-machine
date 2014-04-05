@@ -1,40 +1,24 @@
-helloHTML
-=========
+#Windows
 
-This is a sample C++ application that uses Webkit, html, css and javascript as the GUI layer. A bridge between C++ and Javascript is provided.
+0. Install Git 1.9.0 from
+	http://git-scm.com/download/win
 
-For usage, look at the index.html and Example.cpp files.
+1. Install QT 5.2.1 with MinGW 32bit from 
+	http://qt-project.org/downloads
+	http://download.qt-project.org/official_releases/qt/5.2/5.2.1/qt-opensource-windows-x86-msvc2010-5.2.1.exe
 
-Requisites:
------------
+2. Install MinGW-get-setup 0.6.2 from
+	http://sourceforge.net/projects/mingw/files/Installer/mingw-get-setup.exe/download
 
-QT4. In Ubuntu you can do `apt-get install qt4-dev-tools qt4-qmake` 
+3. Using mingw-get, install gcc, msys (and other stuff I can't remember).
 
-Compilation instructions:
--------------------------
+4. Create a shortcut to C:\MinGW\msys\1.0\msys.bat somewhere, that's what you'll use to launch the MinGW terminal.
 
-    cd path/to/helloHTML
-    qmake
-    make
+5. Create a file in /c/MinGW/mysys/home/<username>/.profile with:
+	export PATH=/c/Qt/Qt5.2.1/5.2.1/mingw48_32/bin:/c/Qt/Qt5.2.1/Tools/mingw48_32/bin:$PATH
 
-License:
---------
+6. Now you can cd into the qt wrapper app and do qmake && make
 
-helloHTML A C++ example program that uses Webkit, html, css and javascript 
-code as a GUI.
+#MacOS
 
-Copyright (C) 2012 Rafael Vega
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
+...

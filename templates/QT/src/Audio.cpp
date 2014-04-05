@@ -1,3 +1,6 @@
+#include <climits>
+//#include <cwchar>
+
 #include "Audio.h"
 #include "Externals.h"
 
