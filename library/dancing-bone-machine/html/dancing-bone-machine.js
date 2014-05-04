@@ -2082,18 +2082,18 @@ var requirejs, require, define;
 
    var scripts = [];
    if(runningInQT){
-      scripts.push('scripts/dancing-bone-machine/puredata.qt');
-      scripts.push('scripts/dancing-bone-machine/dbm.file.qt');
+      scripts.push('scripts/dbm/puredata.qt');
+      scripts.push('scripts/dbm/dbm.file.qt');
    }
    else if(runningInCordova){
-      scripts.push('scripts/dancing-bone-machine/puredata.cordova');
-      scripts.push('scripts/dancing-bone-machine/dbm.file.cordova');
-      scripts.push('scripts/dancing-bone-machine/cordova/cordova');
+      scripts.push('scripts/dbm/puredata.cordova');
+      scripts.push('scripts/dbm/dbm.file.cordova');
+      scripts.push('scripts/dbm/cordova/cordova');
    }
    else{ //runnning in a web browser
-      scripts.push('scripts/dancing-bone-machine/puredata.browser');
-      scripts.push('scripts/dancing-bone-machine/dbm.file.browser');
-      scripts.push('scripts/dancing-bone-machine/shims');
+      scripts.push('scripts/dbm/puredata.browser');
+      scripts.push('scripts/dbm/dbm.file.browser');
+      scripts.push('scripts/dbm/shims');
    }
 
    require(scripts, function(script1, script2, script3){

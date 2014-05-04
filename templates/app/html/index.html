@@ -9,12 +9,11 @@
 
    <link rel="stylesheet" href="styles/styles.css" type="text/css" media="all" />
 
-   <script src="scripts/dancing-bone-machine/dancing-bone-machine.js" type="text/javascript" charset="utf-8"></script>
+   <script src="scripts/dbm/dancing-bone-machine.js" type="text/javascript" charset="utf-8"></script>
 </head>
 <body>
 
    <button id="btn" type="button">Beep.</button>
-   <br/><button id="btnPicker" type="button">Choose a song from iTunes.</button>
 
    <script type="text/javascript" charset="utf-8">
       var sound_on = false;
@@ -31,19 +30,6 @@
          }
       }
 
-    function button2(e){
-        PD.showMediaPicker(function(song){
-            console.log(song.path);
-            console.log(song.title);
-            console.log(song.album);
-            console.log(song.artist);
-        },
-        function(msg){
-            console.log(msg);
-        });
-    }
-
-
       function main(){
          // Init PureData engine and load synth.pd patch.
          PD.configurePlayback(44100, 2, false, false, function(){
@@ -56,10 +42,6 @@
          var btn = document.getElementById('btn');
          btn.onmouseup = button;
          btn.ontouchend = button;
-         
-         var btnPicker = document.getElementById('btnPicker');
-         btnPicker.onmouseup = button2;
-         btnPicker.ontouchend = button2;
     };
    </script>
 </body>

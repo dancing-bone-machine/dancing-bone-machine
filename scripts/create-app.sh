@@ -19,7 +19,7 @@
 
 
 if [ -d "app" ]; then
-   read -p "WAIT! An app directory, if you continue you will overwrite it. Do you want to continue? [Ny]" -n 1 -r
+   read -p "WAIT! There is already an app directory, if you continue you will overwrite it. Do you want to continue? [Ny]" -n 1 -r
    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
       exit
    fi
@@ -27,11 +27,17 @@ fi
 
 echo -e "\n..."
 
+# Delete old app directory, create new one
 rm -rf app
 cp -f -R dbm/templates/app app
 
+# Fix symlinks in app dir
 cd app/html/scripts
-rm dancing-bone-machine
-ln -s ../../../dbm/library/dancing-bone-machine/html dancing-bone-machine
+rm -f dbm
+ln -s ../../../dbm/library/dancing-bone-machine/html dbm
+cd ../../../
+cd app/pd
+rm -f dbm
+ln -s ../../dbm/library/dancing-bone-machine/pd/externals/bin dbm
 
 echo -e "Done."
