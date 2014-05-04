@@ -5,7 +5,7 @@
 
 1. Install QT 5.2.1 with MinGW 32bit from 
 	http://qt-project.org/downloads
-	http://download.qt-project.org/official_releases/qt/5.2/5.2.1/qt-opensource-windows-x86-msvc2010-5.2.1.exe
+    http://download.qt-project.org/official_releases/qt/5.2/5.2.1/qt-opensource-windows-x86-mingw48_opengl-5.2.1.exe
 
 2. Install MinGW-get-setup 0.6.2 from
 	http://sourceforge.net/projects/mingw/files/Installer/mingw-get-setup.exe/download
