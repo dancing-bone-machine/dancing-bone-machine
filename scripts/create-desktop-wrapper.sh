@@ -31,9 +31,16 @@ rm -rf app/wrappers/desktop
 cp -f -R dbm/templates/desktop app/wrappers/desktop
 
 cd app/wrappers/desktop
-rm -f app
-rm -f vendors
-ln -s ../.. app
-ln -s ../../../dbm/library/vendors vendors
+if [[ "$OS" =~ Windows ]]; then
+	rm -rf app
+	rm -rf vendors
+	cmd //c mklink //J app ..\\..\\
+	cmd //c mklink //J vendors ..\\..\\..\\dbm\\library\\vendors
+else 
+	rm -f app
+	rm -f vendors
+	ln -s ../.. app
+	ln -s ../../../dbm/library/vendors vendors
+fi
 
 echo -e "Done."
