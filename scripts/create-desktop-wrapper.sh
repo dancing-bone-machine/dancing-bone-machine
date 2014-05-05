@@ -27,16 +27,20 @@ fi
 
 echo -e "\n..."
 
-rm -rf app/wrappers/desktop
-cp -f -R dbm/templates/desktop app/wrappers/desktop
-
-cd app/wrappers/desktop
 if [[ "$OS" =~ Windows ]]; then
-	rm -rf app
-	rm -rf vendors
+	rm -rf dbm/templates/desktop/app
+	rm -rf dbm/templates/desktop/vendors
+	cmd //c rmdir app\\wrappers\\desktop
+	cmd //c xcopy //E dbm\\templates\\desktop app\\wrappers\\desktop
+	cd app/wrappers/desktop
+	cmd //c rmdir app
+	cmd //c rmdir vendors
 	cmd //c mklink //J app ..\\..\\
 	cmd //c mklink //J vendors ..\\..\\..\\dbm\\library\\vendors
 else 
+	rm -rf app/wrappers/desktop
+	cp -f -R dbm/templates/desktop app/wrappers/desktop
+	cd app/wrappers/desktop
 	rm -f app
 	rm -f vendors
 	ln -s ../.. app
