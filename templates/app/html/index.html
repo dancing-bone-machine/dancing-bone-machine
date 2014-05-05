@@ -33,7 +33,7 @@
       function main(){
          // Init PureData engine and load synth.pd patch.
          PD.configurePlayback(44100, 2, false, false, function(){
-            PD.openFile('pd/patches', 'patch.pd', function(){
+            PD.openFile('pd', 'patch.pd', function(){
                PD.setActive(true);
                PD.sendFloat(0, 'volume');
             });

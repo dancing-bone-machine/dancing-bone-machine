@@ -1,0 +1,7 @@
+*.un~
+*.swp
+.qmake.stash
+bin
+obj
+Makefile
+qrc_htmlResources.cpp
