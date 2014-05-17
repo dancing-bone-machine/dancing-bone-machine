@@ -3,7 +3,7 @@
 	url = https://github.com/dancing-bone-machine/pd-for-ios.git
 [submodule "library/vendors/libpd"]
 	path = library/vendors/libpd
-	url = https://github.com/dancing-bone-machine/libpd.git
+   url = https://github.com/rvega/libpd.git
 [submodule "library/vendors/rtaudio"]
 	path = library/vendors/rtaudio
 	url = https://github.com/dancing-bone-machine/rtaudio.git
