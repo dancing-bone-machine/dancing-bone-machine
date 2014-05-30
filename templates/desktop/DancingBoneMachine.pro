@@ -92,7 +92,7 @@ PRE_TARGETDEPS += $$rtaudio_lib
 LIBS += $$rtaudio_lib
 macx{
    DEFINES += __MACOSX_CORE__ 
-   rtaudio.commands = cd $$rtaudio_dir && ./configure --with-core && make
+   rtaudio.commands = cd $$rtaudio_dir && autoconf && ./configure --with-core && make
    LIBS += -framework CoreFoundation
    LIBS += -framework CoreAudio
    LIBS += -framework Accelerate

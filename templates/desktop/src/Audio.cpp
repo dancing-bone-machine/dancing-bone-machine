@@ -98,7 +98,7 @@ int DBM::Audio::start(){
       rtaudio.openStream( &outputParams, &inputParams, RTAUDIO_FLOAT32, sampleRate, &blockSize, &audioCallback, NULL, &options);
       rtaudio.startStream();
    }
-   catch ( RtError& e ) {
+   catch ( RtAudioError& e ) {
       std::cout << '\n' << e.getMessage() << '\n' << std::endl;
       return 0;
    }
