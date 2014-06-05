@@ -362,7 +362,7 @@ define(function() {
    QT.doReceiveBang.connect(PD, "_didReceiveSend");
    QT.doReceiveFloat.connect(PD, "_didReceiveSend");
    QT.doReceiveSymbol.connect(PD, "_didReceiveSend");
-   // QT.doReceiveList.connect(PD, "_didReceiveSend");
+   QT.doReceiveList.connect(PD, "_didReceiveSend");
    // QT.doReceiveMessage.connect(PD, "_didReceiveSend");
 
    return PD;
