@@ -326,7 +326,59 @@ define(function() {
       },
 
       /////////////////////////////////////////////////////////////////////////
-      // Configure audio engine
+      // Configure sound card
+      //
+
+      /**
+       * Gets a list of usable sound devices
+       * 
+       * Example:
+       *    PD.getAudioDevices(function(devices){
+       *       console.log(devices); 
+       *    });
+       *    
+       * Would output something like
+       * { 
+       *    'devices': [
+       *       {
+       *          id: 1,
+       *          api: 'ASIO',
+       *          name: 'Roland FA-66',
+       *          outputChannels: 6,
+       *          inputChannels: 6,
+       *          //etc... 
+       *       },
+       *       {
+       *          id: 2,
+       *          api: 'ASIO',
+       *          name: 'M-Audio Whatever',
+       *          outputChannels: 8,
+       *          inputChannels: 8,
+       *          //etc... 
+       *       },
+       *       {
+       *          id: 1,
+       *          api: 'DS',
+       *          name: 'Intel Foo',
+       *          outputChannels: 2,
+       *          inputChannels: 0,
+       *          //etc... 
+       *       }
+       *    ]
+       * }
+       */
+      getAudioDevices: function(success, error){
+         var cbid = PD._queueCallbacks(success, error);
+         QT.getAudioDevices(cbid);
+      },
+
+      getDefaultOutputDevice: function(success, error){
+         var cbid = PD._queueCallbacks(success, error);
+         QT.getDefaultOutputDevice(cbid);
+      },
+
+      /////////////////////////////////////////////////////////////////////////
+      // start audio engine
 
       /**
        * Configures connection with audio hardware with given sample rate, 
@@ -337,7 +389,7 @@ define(function() {
        * 
        * Example:
        *     
-       *      PureData.configurePlayback(44100, 2, false, false, 
+       *      PD.configurePlayback('ASIO', 0, 44100, 2, false, false, 
        *         function(params){
        *           // Success, do something with params.sampleRate, 
        *           // params.numChannels, params.inputEnabled, params.mixingEnabled
@@ -349,10 +401,14 @@ define(function() {
        *  
        * @method configurePlayback
        */
-      configurePlayback: function(sampleRate, numberChannels, inputEnabled, mixingEnabled, success, error){
-         console.log('eee');
+      startAudio: function(inputDevice, inputChannels, outputDevice, outputChannels, sampleRate, mixingEnabled, success, error){
          var cbid = PD._queueCallbacks(success, error);
-         QT.configurePlayback(sampleRate, numberChannels, inputEnabled, mixingEnabled, cbid);
+         QT.startAudio(inputDevice, inputChannels, outputDevice, outputChannels, sampleRate, mixingEnabled, cbid);
+      },
+
+      stopAudio: function(success, error){
+         var cbid = PD._queueCallbacks(success, error);
+         QT.stopAudio(cbid);
       }
    };
 
