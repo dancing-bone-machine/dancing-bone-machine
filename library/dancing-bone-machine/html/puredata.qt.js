@@ -31,9 +31,6 @@ define(function() {
     * @static
     */
    var PD = {
-      //////////////////////////////////////////////////////////////////////////
-      // Some utilities
-
       /**
        * Called by methods that have not been implemented yet
        *
@@ -79,26 +76,101 @@ define(function() {
       },
       
       //////////////////////////////////////////////////////////////////////////
+      // shortcut functions
+      //
+
+      /**
+       * Shortcut function, inits pd, loads a patch and starts sound 
+       *
+       * @method start
+       */
+      start: function(params, success, error){
+         var p = params || {};
+         var inChannels = p.inChannels || 0;
+         var outChannels = p.outChannels || 2;
+         var inDevice = p.inDevice || 'default';
+         var outDevice = p.outDevice || 'default';
+         var sampleRate = p.sampleRate || 44100;
+         var mixingEnabled = p.mixingEnabled || false;
+         var path = p.path || 'pd';
+         var patch = p.patch || 'patch.pd';
+
+         PD.init(inChannels, outChannels, sampleRate, function(){
+            PD.openPatch(path, patch, function(){
+               PD.startAudio(inDevice, inChannels, outDevice, outChannels, sampleRate, mixingEnabled, function(){
+                  PD.setActive(true);
+                  success();
+               },function(err){
+                  error(err);
+               });
+            }, function(err){
+               error(err);
+            });
+         },function(err){
+            error(err);
+         });
+
+      },
+
+      /**
+       * Shortcut function, stops pd, closes patch, stops audio interface.      
+       * 
+       * @method stop
+       */
+      stop: function(success, error){
+         PD.setActive(false);
+         PD.stopAudio(function(){
+            PD.closePatch(function(){
+               PD.clear(function(){
+                  success();
+               }, function(err){
+                  error(err);
+               });
+            });
+         });
+      },
+
+      //////////////////////////////////////////////////////////////////////////
       // Open and close puredata files
 
+      /**
+       * Initializes PD engine
+       *
+       * @method init
+       */
+      init: function(inChannels, outChannels, sampleRate, success, error){
+         var cbid = PD._queueCallbacks(success, error);
+         QT.init(inChannels, outChannels, sampleRate, cbid);
+      },
+
+      /**
+       * Closes PD engine
+       *
+       * @method clear
+       */
+      clear: function(success, error){
+         var cbid = PD._queueCallbacks(success, error);
+         QT.clear(cbid);
+      },
 
       /**
        * Opens a PD patch. 
        *
-       * @method openFile
+       * @method openPatch
        */
-      openFile: function(dir, file, success, error){
+      openPatch: function(dir, file, success, error){
          var cbid = PD._queueCallbacks(success, error);
-         QT.openFile(dir, file, cbid);
+         QT.openPatch(dir, file, cbid);
       },
 
       /**
        * Closes a PD patch.
        *
-       * @method closeFile
+       * @method closePatch
        */
-      closeFile: function(file, success, error){
-         this._unimplemented(success);
+      closePatch: function(success, error){
+         var cbid = PD._queueCallbacks(success,error);
+         QT.closePatch(cbid);
       },
 
       /**
@@ -110,6 +182,87 @@ define(function() {
          this._unimplemented(success);
       },
 
+      /////////////////////////////////////////////////////////////////////////
+      // Configure Audio device
+      //
+
+      /**
+       * Gets a list of usable sound devices
+       * 
+       * Example:
+       *    PD.getAudioDevices(function(devices){
+       *       console.log(devices); 
+       *    });
+       *    
+       * Would output something like
+       * { 
+       *    'devices': [
+       *       {
+       *          id: 1,
+       *          api: 'ASIO',
+       *          name: 'Roland FA-66',
+       *          outputChannels: 6,
+       *          inputChannels: 6,
+       *          //etc... 
+       *       },
+       *       {
+       *          id: 2,
+       *          api: 'ASIO',
+       *          name: 'M-Audio Whatever',
+       *          outputChannels: 8,
+       *          inputChannels: 8,
+       *          //etc... 
+       *       },
+       *       {
+       *          id: 1,
+       *          api: 'DS',
+       *          name: 'Intel Foo',
+       *          outputChannels: 2,
+       *          inputChannels: 0,
+       *          //etc... 
+       *       }
+       *    ]
+       * }
+       */
+      getAudioDevices: function(success, error){
+         var cbid = PD._queueCallbacks(success, error);
+         QT.getAudioDevices(cbid);
+      },
+
+      getDefaultOutputDevice: function(success, error){
+         var cbid = PD._queueCallbacks(success, error);
+         QT.getDefaultOutputDevice(cbid);
+      },
+
+      /**
+       * Configures connection with audio hardware with given sample rate, 
+       * number of channels and enables or disables mixing (wether sound 
+       * stays on on when app ins minimized).
+       * Parameters may be changed by audio engine so success callback 
+       * should check for new values.
+       * 
+       * Example:
+       *     
+       *      PD.configurePlayback('ASIO:1', 2, 'ASIO:2', 2, 44100, false,  
+       *         function(params){
+       *           console.log(params);
+       *         },
+       *         function(error){
+       *           console.log(error);
+       *         }
+       *       );
+       *  
+       * @method configurePlayback
+       */
+      startAudio: function(inputDevice, inputChannels, outputDevice, outputChannels, sampleRate, mixingEnabled, success, error){
+         var cbid = PD._queueCallbacks(success, error);
+         QT.startAudio(inputDevice, inputChannels, outputDevice, outputChannels, sampleRate, mixingEnabled, cbid);
+      },
+
+      stopAudio: function(success, error){
+         var cbid = PD._queueCallbacks(success, error);
+         QT.stopAudio(cbid);
+      },
 
       //////////////////////////////////////////////////////////////////////////
       // Send messages to PD 
@@ -173,6 +326,10 @@ define(function() {
          // this._websocket.send(msg);
       },
 
+
+      //////////////////////////////////////////////////////////////////////////
+      // Receiving messages from PD
+      //
 
      /**
       * Subscribe to sends from pd patch.
@@ -323,92 +480,6 @@ define(function() {
       bindPrint: function(callback){
          this._unimplemented();
          // default implementation should console.log
-      },
-
-      /////////////////////////////////////////////////////////////////////////
-      // Configure sound card
-      //
-
-      /**
-       * Gets a list of usable sound devices
-       * 
-       * Example:
-       *    PD.getAudioDevices(function(devices){
-       *       console.log(devices); 
-       *    });
-       *    
-       * Would output something like
-       * { 
-       *    'devices': [
-       *       {
-       *          id: 1,
-       *          api: 'ASIO',
-       *          name: 'Roland FA-66',
-       *          outputChannels: 6,
-       *          inputChannels: 6,
-       *          //etc... 
-       *       },
-       *       {
-       *          id: 2,
-       *          api: 'ASIO',
-       *          name: 'M-Audio Whatever',
-       *          outputChannels: 8,
-       *          inputChannels: 8,
-       *          //etc... 
-       *       },
-       *       {
-       *          id: 1,
-       *          api: 'DS',
-       *          name: 'Intel Foo',
-       *          outputChannels: 2,
-       *          inputChannels: 0,
-       *          //etc... 
-       *       }
-       *    ]
-       * }
-       */
-      getAudioDevices: function(success, error){
-         var cbid = PD._queueCallbacks(success, error);
-         QT.getAudioDevices(cbid);
-      },
-
-      getDefaultOutputDevice: function(success, error){
-         var cbid = PD._queueCallbacks(success, error);
-         QT.getDefaultOutputDevice(cbid);
-      },
-
-      /////////////////////////////////////////////////////////////////////////
-      // start audio engine
-
-      /**
-       * Configures connection with audio hardware with given sample rate, 
-       * number of channels and enables or disables mixing (wether sound 
-       * stays on on when app ins minimized).
-       * Parameters may be changed by audio engine so success callback 
-       * should check for new values.
-       * 
-       * Example:
-       *     
-       *      PD.configurePlayback('ASIO', 0, 44100, 2, false, false, 
-       *         function(params){
-       *           // Success, do something with params.sampleRate, 
-       *           // params.numChannels, params.inputEnabled, params.mixingEnabled
-       *         },
-       *         function(error){
-       *           console.log(error);
-       *         }
-       *       );
-       *  
-       * @method configurePlayback
-       */
-      startAudio: function(inputDevice, inputChannels, outputDevice, outputChannels, sampleRate, mixingEnabled, success, error){
-         var cbid = PD._queueCallbacks(success, error);
-         QT.startAudio(inputDevice, inputChannels, outputDevice, outputChannels, sampleRate, mixingEnabled, cbid);
-      },
-
-      stopAudio: function(success, error){
-         var cbid = PD._queueCallbacks(success, error);
-         QT.stopAudio(cbid);
       }
    };
 
