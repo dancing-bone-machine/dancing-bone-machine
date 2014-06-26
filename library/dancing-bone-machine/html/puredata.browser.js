@@ -81,54 +81,6 @@ define(function() {
          this._websocket.send(msg);
       },
 
-
-      initialize: function(success, error){
-         this._doNothing(success);
-      },
-
-      clearSearchPath: function(success, error){
-         this._doNothing(success);
-      },
-
-      addToSearchPath: function(path, success, error){
-         this._doNothing(success);
-      },
-
-      /**
-       * Connects to websockets proxy script, displays console messages to 
-       * remind user to launch pd-extended.
-       *
-       * @method openFile
-       */
-      openFile: function(dir, file, success, error){
-         this._openFileSuccessCallback = success;
-         this._file = file;
-         this._connect();
-      },
-
-      _file: null,
-
-      _openFileSuccessCallback: null,
-      
-      _connectionTimer: null,
-
-      _connect: function(){
-         window.WebSocket = window.WebSocket || window.MozWebSocket;
-         this._websocket = new WebSocket('ws://127.0.0.1:9000', 'pd-websocket'); 
-
-         this._websocket.onopen = function () {
-            console.log('Established connection with ' + PD._file);
-            if(typeof PD._openFileSuccessCallback != 'undefined') PD._openFileSuccessCallback();
-         };
-
-         this._websocket.onerror = function () {
-            setTimeout(PD._connect, 5000);
-            console.log('Could not establish connection with ' + PD._file + '. Make sure it\'s open in pd-extended. Retrying in 5 secs...');
-         };
-
-         this._websocket.onmessage = this._didReceiveMessage;
-      },
-
       /**
        * Fires when a websockets message was received.
        *
@@ -159,12 +111,175 @@ define(function() {
          }
       },
 
-      closeFile: function(file, success, error){
+      //////////////////////////////////////////////////////////////////////////
+      // shortcut functions
+      //
+
+      /**
+       * Shortcut function, inits pd, loads a patch and starts sound 
+       *
+       * @method start
+       */
+      start: function(params, success, error){
+         var p = params || {};
+         var inChannels = p.inChannels || 0;
+         var outChannels = p.outChannels || 2;
+         var inDevice = p.inDevice || 'default';
+         var outDevice = p.outDevice || 'default';
+         var sampleRate = p.sampleRate || 44100;
+         var mixingEnabled = p.mixingEnabled || false;
+         var path = p.path || 'pd';
+         var patch = p.patch || 'patch.pd';
+
+         PD.init(inChannels, outChannels, sampleRate, function(){
+            PD.openPatch(path, patch, function(){
+               PD.startAudio(inDevice, inChannels, outDevice, outChannels, sampleRate, mixingEnabled, function(){
+                  PD.setActive(true);
+                  success();
+               },function(err){
+                  error(err);
+               });
+            }, function(err){
+               error(err);
+            });
+         },function(err){
+            error(err);
+         });
+
+      },
+
+      /**
+       * Shortcut function, stops pd, closes patch, stops audio interface.      
+       * 
+       * @method stop
+       */
+      stop: function(success, error){
+         PD.setActive(false);
+         PD.stopAudio(function(){
+            PD.closePatch(function(){
+               PD.clear(function(){
+                  success();
+               }, function(err){
+                  error(err);
+               });
+            });
+         });
+      },
+
+      //////////////////////////////////////////////////////////////////////////
+      // Open and close puredata files
+
+      init: function(inChannels, outChannels, sampleRate, success, error){
+         this._doNothing(success);
+      },
+
+      clear: function(success, error){
+         this._doNothing(success);
+      },
+
+      /**
+       * Connects to websockets proxy script, displays console messages to 
+       * remind user to launch pd-extended.
+       *
+       * @method openPatch
+       */
+      openPatch: function(dir, file, success, error){
+         this._openFileSuccessCallback = success;
+         this._file = file;
+         this._connect();
+      },
+
+      _file: null,
+
+      _openFileSuccessCallback: null,
+      
+      _connectionTimer: null,
+
+      _connect: function(){
+         window.WebSocket = window.WebSocket || window.MozWebSocket;
+         this._websocket = new WebSocket('ws://127.0.0.1:9000', 'pd-websocket'); 
+
+         this._websocket.onopen = function () {
+            console.log('Established connection with ' + PD._file);
+            if(typeof PD._openFileSuccessCallback != 'undefined') PD._openFileSuccessCallback();
+         };
+
+         this._websocket.onerror = function () {
+            setTimeout(PD._connect, 5000);
+            console.log('Could not establish connection with ' + PD._file + '. Make sure it\'s open in pd-extended. Retrying in 5 secs...');
+         };
+
+         this._websocket.onmessage = this._didReceiveMessage;
+      },
+
+      closePatch: function(file, success, error){
          this._doNothing(success);
       },
 
       dollarZeroForFile: function(file, success, error){
          this._unimplemented(); 
+      },
+
+      clearSearchPath: function(success, error){
+         this._doNothing(success);
+      },
+
+      addToSearchPath: function(path, success, error){
+         this._doNothing(success);
+      },
+
+      /////////////////////////////////////////////////////////////////////////
+      // Configure Audio device
+      //
+
+      getAudioDevices: function(success, error){
+         var device = {
+            id: 1,
+            api: 'WEBSOCKETS',
+            name: 'PD',
+            outputChannels: 100,
+            inputChannels: 100
+         };
+
+         success( {devices:[device]} );
+      },
+
+      getDefaultOutputDevice: function(success, error){
+         PD.getAudioDevices(function(devices){
+            var dev = devices.devices[0];
+            success(dev);
+         })
+      },
+
+      startAudio: function(inputDevice, inputChannels, outputDevive, outputChannels, sampleRate, mixingEnabled, success, error){
+         this._doNothing(success);
+      },
+
+      stopAudio: function(success, error){
+         this._doNothing(success);
+      },
+
+
+      //////////////////////////////////////////////////////////////////////////
+      // Send messages to PD 
+
+      /**
+       * Sends DSP on/off message
+       *
+       * @method setActive
+       */
+      setActive: function(active){
+         var msg = 'dbm-active ' + active;
+         this._send(msg);
+      },
+
+      /**
+       * Does nothing in debug mode
+       *
+       * @method setActive
+       */
+      getActive: function(success, error){
+         this._doNothing(success);
       },
 
       /**
@@ -223,6 +338,10 @@ define(function() {
       },
 
 
+      //////////////////////////////////////////////////////////////////////////
+      // Receiving messages from PD
+      //
+
       /**
        * Subscribe to sends from pd patch.
        * Ex: PD.bind('gain', function(msg){
@@ -277,6 +396,10 @@ define(function() {
          this._unimplemented();
       },
 
+      //////////////////////////////////////////////////////////////////////////
+      // Receiving messages from PD
+      //
+
       /**
        * Reads contents of an array or table object in the PD patch. 
        * If n is 0, the whole array is returned
@@ -319,6 +442,9 @@ define(function() {
          this._unimplemented();
       },
 
+      //////////////////////////////////////////////////////////////////////////
+      // Send MIDI events to PD
+
       /**
        * Send a MIDI note on message to the PD patch
        *
@@ -359,6 +485,9 @@ define(function() {
       sendSysRealTime: function(port, value){ 
          this._send('dbm-midirealtimein ' + port +' '+ value);
       },
+
+      ///////////////////////////////////////////////////////////////////////// 
+      // Receive MIDI events from PD
 
       _didReceiveMidi: function(cmd, msg){
          switch (cmd) {
@@ -441,68 +570,24 @@ define(function() {
       bindPrint: function(callback){
          this._unimplemented();
          // default implementation should console.log
-      },
+      }
 
-      /**
-       * Does nothing in debug mode.
-       *
-       * @method configurePlayback
-       */
-      configurePlayback: function(sampleRate, numberChannels, inputEnabled, mixingEnabled, success, error){
-         this._doNothing(success);
-      },
 
-      /**
-       * Does nothing in debug mode.
-       *
-       * @method configureAmbient
-       */
-      configureAmbient: function(sampleRate, numberChannels, mixingEnabled, success, error){
-         this._doNothing(success);
-      },
-
-      /**
-       * Does nothing in debug mode.
-       *
-       * @method configureTicksPerBuffer
-       */
-      configureTicksPerBuffer: function(ticksPerBuffer, success, error){
-         this._doNothing(success);
-      },
-
-      /**
-       * Sends DSP on/off message
-       *
-       * @method setActive
-       */
-      setActive: function(active){
-         var msg = 'dbm-active ' + active;
-         this._send(msg);
-      },
-
-      /**
-       * Does nothing in debug mode
-       *
-       * @method setActive
-       */
-      getActive: function(success, error){
-         this._doNothing(success);
-      },
 
       /**
        * Simulate what a media picker would return
        */
-      showMediaPicker: function(success, error){
-         setTimeout(function(){
-            success({
-               title: 'I am the Walrus',
-               album: 'Magical Mystery Tour',
-               artist: 'The Beatles',
-               path: '/Users/rafa/Desktop/IAmTheWalrus-MagicalMysteryTour-TheBeatles.caf',
-               builtIn: false
-            });
-         },2000);
-      },
+      // showMediaPicker: function(success, error){
+      //    setTimeout(function(){
+      //       success({
+      //          title: 'I am the Walrus',
+      //          album: 'Magical Mystery Tour',
+      //          artist: 'The Beatles',
+      //          path: '/Users/rafa/Desktop/IAmTheWalrus-MagicalMysteryTour-TheBeatles.caf',
+      //          builtIn: false
+      //       });
+      //    },2000);
+      // },
    };
    return PD;
 })
