@@ -95,9 +95,9 @@ define(function() {
          var path = p.path || 'pd';
          var patch = p.patch || 'patch.pd';
 
-         PD.init(inChannels, outChannels, sampleRate, function(){
-            PD.openPatch(path, patch, function(){
-               PD.startAudio(inDevice, inChannels, outDevice, outChannels, sampleRate, mixingEnabled, function(){
+         PD.startAudio(inDevice, inChannels, outDevice, outChannels, sampleRate, mixingEnabled, function(params){
+            PD.init(params.inputChannels, params.outputChannels, params.sampleRate, function(){
+               PD.openPatch(path, patch, function(){
                   PD.setActive(true);
                   success();
                },function(err){
